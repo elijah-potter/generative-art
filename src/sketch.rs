@@ -1,9 +1,6 @@
 use image::{Rgba, RgbaImage};
 use imageproc::{
-    drawing::{
-        draw_line_segment_mut, draw_polygon_mut,
-        Blend, Canvas,
-    },
+    drawing::{draw_line_segment_mut, draw_polygon_mut, Blend, Canvas},
     point::Point,
 };
 use rand::Rng;
