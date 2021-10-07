@@ -47,8 +47,6 @@ impl Sketcher {
     pub fn new_preslav(output_width: u32, output_height: u32, expected_iterations: usize) -> Self {
         let initial_stroke_size = output_width as f64 / 4.0;
 
-        dbg!(initial_stroke_size / expected_iterations as f64);
-
         Self {
             output_width,
             output_height,
