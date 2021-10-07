@@ -1,7 +1,7 @@
 use image::{Rgba, RgbaImage};
 use imageproc::{
     drawing::{
-        draw_antialiased_line_segment, draw_line_segment, draw_line_segment_mut, draw_polygon_mut,
+        draw_line_segment_mut, draw_polygon_mut,
         Blend, Canvas,
     },
     point::Point,
