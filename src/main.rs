@@ -1,5 +1,3 @@
-use image::GenericImageView;
-
 use imageproc::drawing::Blend;
 use indicatif::ProgressBar;
 use sketch::Sketcher;
