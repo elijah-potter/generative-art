@@ -47,11 +47,13 @@ impl Sketcher {
     pub fn new_preslav(output_width: u32, output_height: u32, expected_iterations: usize) -> Self {
         let initial_stroke_size = output_width as f64 / 4.0;
 
+        dbg!(initial_stroke_size / expected_iterations as f64);
+
         Self {
             output_width,
             output_height,
             stroke_ratio: 0.75,
-            stroke_reduction: 0.002,
+            stroke_reduction: initial_stroke_size / 70.0 / expected_iterations as f64,
             stroke_jitter: 0.1 * output_width as f64,
             stroke_inversion_threshold: 0.05,
             alpha: 70.0,
