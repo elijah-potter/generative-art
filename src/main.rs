@@ -1,11 +1,27 @@
+use std::path::PathBuf;
+
 use imageproc::drawing::Blend;
 use indicatif::ProgressBar;
 use sketch::Sketcher;
+use structopt::StructOpt;
 
 mod sketch;
 
+#[derive(StructOpt, Debug)]
+#[structopt(name = "Art")]
+struct Opt{
+    #[structopt(parse(from_os_str))]
+    /// Name of file to use as input
+    input: PathBuf,
+    #[structopt(short, long, parse(from_os_str))]
+    /// Name of file to save generated art to
+    output: PathBuf
+}
+
 fn main() -> anyhow::Result<()> {
-    let in_image = image::open("input.jpg")?;
+    let opt = Opt::from_args();
+
+    let in_image = image::open(opt.input)?;
     let in_image = in_image.into_rgba8();
 
     let iter_count = 5000;
@@ -20,7 +36,7 @@ fn main() -> anyhow::Result<()> {
         bar.inc(1);
         sketcher.draw_iter(&in_image);
     }
-    sketcher.image.0.save("output.png")?;
+    sketcher.image.0.save(opt.output)?;
 
     bar.finish();
     Ok(())
