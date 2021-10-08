@@ -3,8 +3,8 @@ use imageproc::{
     drawing::{draw_line_segment_mut, draw_polygon_mut, Blend, Canvas},
     point::Point,
 };
-use rand::Rng;
-use std::f64::consts::PI;
+use rand::{Rng, SeedableRng, prelude::StdRng};
+use std::{convert::TryInto, f64::consts::PI};
 
 pub struct Sketcher {
     /// Width of the output image
@@ -22,6 +22,7 @@ pub struct Sketcher {
     pub stroke_size: f64,
     pub initial_stroke_size: f64,
     pub image: Blend<RgbaImage>,
+    rng: Option<StdRng>
 }
 
 impl Sketcher {
@@ -40,6 +41,7 @@ impl Sketcher {
             stroke_size: Default::default(),
             initial_stroke_size: Default::default(),
             image: Blend(RgbaImage::new(output_width, output_height)),
+            rng: Default::default()
         }
     }
 
@@ -61,12 +63,22 @@ impl Sketcher {
             stroke_size: initial_stroke_size,
             initial_stroke_size,
             image: Blend(RgbaImage::new(output_width, output_height)),
+            rng: Default::default()
         }
     }
 
     /// Runs a single iteration
     pub fn draw_iter(&mut self, input: &RgbaImage) {
-        let mut rng = rand::thread_rng();
+        if self.rng.is_none(){
+            let seed = match input.chunks(32).next(){
+                Some(chunk) => chunk.to_owned().try_into().unwrap(),
+                None => [0; 32],
+            };
+
+            self.rng = Some(StdRng::from_seed(seed))
+        }
+
+        let rng = self.rng.as_mut().unwrap();
 
         let x = rng.gen_range(0.0..(self.output_width as f64));
         let y = rng.gen_range(0.0..(self.output_height as f64));
