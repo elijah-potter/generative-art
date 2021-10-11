@@ -11,12 +11,22 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
-wasm-bindgen = "0.2.63"
+wasm-bindgen = "0.2.78"
 anyhow = "1.0.44"
-image = "0.23.14"
-imageproc = "0.22.0"
+image = { version = "0.23.14", default-features = false, features = [
+    "jpeg",
+    "ico",
+    "png",
+    "pnm",
+    "tga",
+    "tiff",
+    "webp",
+    "bmp",
+    "hdr",
+] }
+imageproc = { version = "0.22.0", default-features = false }
 indicatif = "0.16.2"
-rand = { version = "0.8.4", default-features = false, features = ["std_rng"]}
+rand = { version = "0.8.4", default-features = false, features = ["std_rng"] }
 structopt = "0.3.23"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
