@@ -1,16 +1,12 @@
-use image::{Rgba, RgbaImage};
+use image::{DynamicImage, ImageFormat, RgbImage, Rgba, RgbaImage};
 use imageproc::{
     drawing::{draw_line_segment_mut, draw_polygon_mut, Blend, Canvas},
     point::Point,
 };
-use rand::{Rng, SeedableRng, prelude::StdRng};
+use rand::{prelude::StdRng, Rng, SeedableRng};
 use std::{convert::TryInto, f64::consts::PI};
 
 pub struct Sketcher {
-    /// Width of the output image
-    pub output_width: u32,
-    /// Height of the output image
-    pub output_height: u32,
     pub stroke_ratio: f64,
     pub stroke_reduction: f64,
     pub stroke_jitter: f64,
@@ -21,15 +17,13 @@ pub struct Sketcher {
     pub max_edge_count: u32,
     pub stroke_size: f64,
     pub initial_stroke_size: f64,
-    pub image: Blend<RgbaImage>,
-    rng: Option<StdRng>
+    canvas: Blend<RgbaImage>,
+    rng: Option<StdRng>,
 }
 
-impl Sketcher {
-    pub fn new(output_width: u32, output_height: u32) -> Self {
+impl Default for Sketcher{
+    fn default() -> Self {
         Self {
-            output_width,
-            output_height,
             stroke_ratio: Default::default(),
             stroke_reduction: Default::default(),
             stroke_jitter: Default::default(),
@@ -40,21 +34,21 @@ impl Sketcher {
             max_edge_count: Default::default(),
             stroke_size: Default::default(),
             initial_stroke_size: Default::default(),
-            image: Blend(RgbaImage::new(output_width, output_height)),
-            rng: Default::default()
+            canvas: Blend(RgbaImage::new(0, 0)),
+            rng: Default::default(),
         }
     }
+}
 
+impl Sketcher {
     /// Create a new sketcher with default values based on Preslav Rachev's suggestions
-    pub fn new_preslav(output_width: u32, output_height: u32, expected_iterations: usize) -> Self {
-        let initial_stroke_size = output_width as f64 / 4.0;
+    pub fn new_preslav(canvas: RgbaImage, expected_iterations: usize) -> Self {
+        let initial_stroke_size = canvas.width() as f64 / 4.0;
 
         Self {
-            output_width,
-            output_height,
             stroke_ratio: 0.75,
             stroke_reduction: initial_stroke_size / 70.0 / expected_iterations as f64,
-            stroke_jitter: 0.1 * output_width as f64,
+            stroke_jitter: 0.1 * canvas.width() as f64,
             stroke_inversion_threshold: 0.05,
             alpha: 70.0,
             alpha_increase: (256.0 - 70.0) / expected_iterations as f64,
@@ -62,15 +56,15 @@ impl Sketcher {
             max_edge_count: 4,
             stroke_size: initial_stroke_size,
             initial_stroke_size,
-            image: Blend(RgbaImage::new(output_width, output_height)),
-            rng: Default::default()
+            canvas: Blend(canvas),
+            rng: Default::default(),
         }
     }
 
     /// Runs a single iteration
     pub fn draw_iter(&mut self, input: &RgbaImage) {
-        if self.rng.is_none(){
-            let seed = match input.chunks(32).next(){
+        if self.rng.is_none() {
+            let seed = match input.chunks(32).next() {
                 Some(chunk) => chunk.to_owned().try_into().unwrap(),
                 None => [0; 32],
             };
@@ -80,8 +74,8 @@ impl Sketcher {
 
         let rng = self.rng.as_mut().unwrap();
 
-        let x = rng.gen_range(0.0..(self.output_width as f64));
-        let y = rng.gen_range(0.0..(self.output_height as f64));
+        let x = rng.gen_range(0.0..(self.canvas.width() as f64));
+        let y = rng.gen_range(0.0..(self.canvas.height() as f64));
 
         let dx = x + rng.gen_range(-self.stroke_jitter..self.stroke_jitter);
         let dy = y + rng.gen_range(-self.stroke_jitter..self.stroke_jitter);
@@ -104,10 +98,10 @@ impl Sketcher {
 
         let polygon_points =
             Self::regular_polygon_points(dx, dy, self.stroke_size, edge_count, rng.gen());
-        draw_polygon_mut(&mut self.image, &polygon_points, color);
+        draw_polygon_mut(&mut self.canvas, &polygon_points, color);
 
         if let Some(edge_color) = edge_color {
-            Self::draw_hollow_polygon_mut(&mut self.image, &polygon_points, edge_color);
+            Self::draw_hollow_polygon_mut(&mut self.canvas, &polygon_points, edge_color);
         }
 
         self.stroke_size -= self.stroke_reduction * self.stroke_size;
@@ -160,5 +154,13 @@ impl Sketcher {
             (poly[poly.len() - 1].x as f32, poly[poly.len() - 1].y as f32),
             color,
         );
+    }
+
+    pub fn get_canvas(&self) -> &RgbaImage {
+        &self.canvas.0
+    }
+
+    pub fn set_canvas(&mut self, image: RgbaImage) {
+        self.canvas = Blend(image);
     }
 }

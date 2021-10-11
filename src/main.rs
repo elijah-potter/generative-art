@@ -28,15 +28,14 @@ fn main() -> anyhow::Result<()> {
 
     let bar = ProgressBar::new(iter_count as u64);
 
-    let mut sketcher = Sketcher::new_preslav(in_image.width(), in_image.height(), iter_count);
-    sketcher.image = Blend(in_image.to_owned());
+    let mut sketcher = Sketcher::new_preslav(in_image.to_owned(), iter_count);
     sketcher.max_edge_count = 6;
 
     for _ in 0..iter_count {
         bar.inc(1);
         sketcher.draw_iter(&in_image);
     }
-    sketcher.image.0.save(opt.output)?;
+    sketcher.get_canvas().save(opt.output)?;
 
     bar.finish();
     Ok(())
