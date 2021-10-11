@@ -1,4 +1,4 @@
-use image::{DynamicImage, ImageFormat, RgbImage, Rgba, RgbaImage};
+use image::{Rgba, RgbaImage};
 use imageproc::{
     drawing::{draw_line_segment_mut, draw_polygon_mut, Blend, Canvas},
     point::Point,
@@ -160,7 +160,4 @@ impl Sketcher {
         &self.canvas.0
     }
 
-    pub fn set_canvas(&mut self, image: RgbaImage) {
-        self.canvas = Blend(image);
-    }
 }

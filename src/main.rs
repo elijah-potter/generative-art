@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use imageproc::drawing::Blend;
+
 use indicatif::ProgressBar;
 use sketch::Sketcher;
 use structopt::StructOpt;
