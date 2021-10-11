@@ -21,7 +21,7 @@ pub struct Sketcher {
     rng: Option<StdRng>,
 }
 
-impl Default for Sketcher{
+impl Default for Sketcher {
     fn default() -> Self {
         Self {
             stroke_ratio: Default::default(),
@@ -159,5 +159,4 @@ impl Sketcher {
     pub fn get_canvas(&self) -> &RgbaImage {
         &self.canvas.0
     }
-
 }

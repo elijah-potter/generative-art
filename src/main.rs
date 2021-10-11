@@ -1,6 +1,5 @@
 use std::path::PathBuf;
 
-
 use indicatif::ProgressBar;
 use sketch::Sketcher;
 use structopt::StructOpt;
@@ -9,13 +8,13 @@ mod sketch;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Art")]
-struct Opt{
+struct Opt {
     #[structopt(parse(from_os_str))]
     /// Name of file to use as input
     input: PathBuf,
     #[structopt(short, long, parse(from_os_str))]
     /// Name of file to save generated art to
-    output: PathBuf
+    output: PathBuf,
 }
 
 fn main() -> anyhow::Result<()> {
