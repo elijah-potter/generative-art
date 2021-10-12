@@ -1,11 +1,21 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Hello wasm-pack!</title>
-  </head>
-  <body>
-    <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
-    <script src="./bootstrap.js"></script>
-  </body>
+
+<head>
+  <meta charset="utf-8">
+  <title>Hello wasm-pack!</title>
+</head>
+
+<body>
+  <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
+  
+  <input type="file" id="upload" accept=".jpg, .jpeg, .ico, .png, .pnm, .tga, .tiff, .bmp"/>
+  <progress id="progress" value="0" min="0" max="100"></progress>
+
+  <img id="before" width="300">
+  <img id="after" width="300">
+  
+  <script src="./bootstrap.js"></script>
+</body>
+
 </html>

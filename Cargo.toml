@@ -20,9 +20,7 @@ image = { version = "0.23.14", default-features = false, features = [
     "pnm",
     "tga",
     "tiff",
-    "webp",
     "bmp",
-    "hdr",
 ] }
 imageproc = { version = "0.22.0", default-features = false }
 indicatif = "0.16.2"
@@ -41,6 +39,7 @@ console_error_panic_hook = { version = "0.1.6", optional = true }
 #
 # Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
 wee_alloc = { version = "0.4.5", optional = true }
+base64 = "0.13.0"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"
