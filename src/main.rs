@@ -14,7 +14,7 @@ struct Opt {
     input: PathBuf,
     #[structopt(short, long, parse(from_os_str))]
     /// Name of file to save generated art to
-    output: PathBuf,
+    output: Option<PathBuf>,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -34,7 +34,7 @@ fn main() -> anyhow::Result<()> {
         bar.inc(1);
         sketcher.draw_iter(&in_image);
     }
-    sketcher.get_canvas().save(opt.output)?;
+    sketcher.get_canvas().save(opt.output.unwrap_or_else(|| "generated.png".into()))?;
 
     bar.finish();
     Ok(())
