@@ -1,0 +1,10 @@
+[package]
+name = "ga-cli"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+indicatif = "0.16.2"
+structopt = "0.3.23"
+anyhow = "1.0.44"
+generative-art = {path = "../generative-art/"}
