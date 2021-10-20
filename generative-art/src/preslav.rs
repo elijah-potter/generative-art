@@ -6,7 +6,8 @@ use imageproc::{
 use rand::{prelude::StdRng, Rng, SeedableRng};
 use std::{convert::TryInto, f64::consts::PI};
 
-pub struct Sketcher {
+/// Art generator based on Preslav's Book *Generative Art in Go*
+pub struct PreslavSketcher {
     pub stroke_ratio: f64,
     pub stroke_reduction: f64,
     pub stroke_jitter: f64,
@@ -21,7 +22,7 @@ pub struct Sketcher {
     rng: Option<StdRng>,
 }
 
-impl Default for Sketcher {
+impl Default for PreslavSketcher {
     fn default() -> Self {
         Self {
             stroke_ratio: Default::default(),
@@ -40,7 +41,7 @@ impl Default for Sketcher {
     }
 }
 
-impl Sketcher {
+impl PreslavSketcher {
     /// Create a new sketcher with default values based on Preslav Rachev's suggestions
     pub fn new_preslav(canvas: RgbaImage, expected_iterations: usize) -> Self {
         let initial_stroke_size = canvas.width() as f64 / 4.0;

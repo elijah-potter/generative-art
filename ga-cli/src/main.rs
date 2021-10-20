@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use indicatif::ProgressBar;
-use generative_art::Sketcher;
+use generative_art::PreslavSketcher;
 use generative_art::image;
 use structopt::StructOpt;
 
@@ -26,7 +26,7 @@ fn main() -> anyhow::Result<()> {
 
     let bar = ProgressBar::new(iter_count as u64);
 
-    let mut sketcher = Sketcher::new_preslav(in_image.to_owned(), iter_count);
+    let mut sketcher = PreslavSketcher::new_preslav(in_image.to_owned(), iter_count);
     sketcher.max_edge_count = 6;
 
     for _ in 0..iter_count {

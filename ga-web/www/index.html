@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Generative Art</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+	<input type="file" id="upload" accept=".jpg, .jpeg, .ico, .png, .pnm, .tga, .tiff, .bmp"/>
+	<img id="output" width=300/>
+
+	<script>
+		function buf2hex(buffer) { // buffer is an ArrayBuffer
+  			return [...new Uint8Array(buffer)]
+      			.map(x => x.toString(16).padStart(2, '0'))
+      			.join('');
+		}
+
+		const upload = document.getElementById('upload');
+		const img = document.getElementById("output");
+
+		upload.addEventListener('change', (event) => {
+    		const fileList = event.target.files;
+
+    		const reader = new FileReader();
+    		reader.addEventListener('load', (event) => {
+        		console.log("Loaded");
+
+				fetch('/preslav', {
+        			method: 'POST',
+        			body: event.target.result
+    			})
+    			.then(response => response.arrayBuffer())
+    			.then(ab => {
+					let hex = buf2hex(ab);
+        			console.log(hex);
+					img.src = "/image/" + hex;
+    			});
+    		});
+
+			reader.readAsArrayBuffer(fileList[0]);
+		});
+	</script>
+</body>
+</html>
