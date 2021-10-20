@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Duration};
+use std::{sync::{Arc, atomic::Ordering}, time::Duration};
 
 use generative_art::{
     image::{self, png::PngEncoder, ImageEncoder},
@@ -6,12 +6,13 @@ use generative_art::{
 };
 use rocket::{http::Status, State};
 
-use crate::ProcessedImages;
+use crate::{ImageCount, ProcessedImages};
 
 #[post("/preslav", data = "<file>")]
 pub fn post_preslav(
     file: Vec<u8>,
     processed: &State<Arc<ProcessedImages>>,
+    count: &State<ImageCount>
 ) -> (Status, Result<Vec<u8>, String>) {
     let canvas = match image::load_from_memory(&file) {
         Ok(v) => v,
@@ -57,6 +58,7 @@ pub fn post_preslav(
     
     let processed = (*processed).clone();
     processed.insert(hash.as_bytes().to_owned(), output);
+    count.fetch_add(1, Ordering::Relaxed);
 
     tokio::spawn(async move{
         tokio::time::sleep(Duration::from_secs(60 * 10)).await;
