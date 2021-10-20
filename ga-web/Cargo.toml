@@ -3,10 +3,6 @@ name = "ga-web"
 version = "0.1.0"
 edition = "2018"
 
-[profile.release]
-lto = "fat"
-codegen-units = 1
-
 [dependencies]
 rocket = { version = "0.5.0-rc.1", features = ["json"] }
 generative-art = {path = "../generative-art/"}

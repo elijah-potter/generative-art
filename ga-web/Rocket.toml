@@ -1,2 +1,5 @@
 [global.limits]
 bytes = 33_554_432
+
+[global]
+address = "0.0.0.0"

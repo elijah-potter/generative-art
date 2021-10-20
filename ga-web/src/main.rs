@@ -46,11 +46,21 @@ fn get_index() -> (ContentType, &'static str) {
     (ContentType::HTML, include_str!("../www/index.html"))
 }
 
+#[get("/font")]
+fn get_font() -> Vec<u8>{
+    include_bytes!("../www/Louis George Cafe.ttf").to_vec()
+}
+
+#[get("/favicon.ico")]
+fn get_favicon() -> (ContentType, Vec<u8>){
+    (ContentType::Icon, include_bytes!("../www/favicon.ico").to_vec())
+}
+
 type ProcessedImages = DashMap<[u8; 32], Vec<u8>>;
 
 #[launch]
 fn rocket() -> _ {
     rocket::build()
         .manage(Arc::new(ProcessedImages::new()))
-        .mount("/", routes![get_index, get_image, post_preslav])
+        .mount("/", routes![get_index, get_font, get_favicon, get_image, post_preslav])
 }
