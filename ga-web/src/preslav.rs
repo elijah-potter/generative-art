@@ -1,16 +1,25 @@
 use std::sync::Arc;
 
-use rocket::{State, http::Status};
-use generative_art::{PreslavSketcher, image::{self, ImageEncoder, ImageFormat, png::PngEncoder}};
+use generative_art::{
+    image::{self, png::PngEncoder, ImageEncoder},
+    PreslavSketcher,
+};
+use rocket::{http::Status, State};
 
 use crate::ProcessedImages;
 
 #[post("/preslav", data = "<file>")]
-pub fn post_preslav(file: Vec<u8>, processed: &State<Arc<ProcessedImages>>) -> (Status, Result<Vec<u8>, String>) {
+pub fn post_preslav(
+    file: Vec<u8>,
+    processed: &State<Arc<ProcessedImages>>,
+) -> (Status, Result<Vec<u8>, String>) {
     let canvas = match image::load_from_memory(&file) {
         Ok(v) => v,
-        Err(err) => {
-            return (Status::BadRequest, Err("Could not process image.".to_owned()));
+        Err(_err) => {
+            return (
+                Status::BadRequest,
+                Err("Could not process image.".to_owned()),
+            );
         }
     };
 
@@ -40,7 +49,7 @@ pub fn post_preslav(file: Vec<u8>, processed: &State<Arc<ProcessedImages>>) -> (
         canvas.height(),
         image::ColorType::Rgba8,
     ) {
-        return (Status::InternalServerError, Err(err.to_string()))
+        return (Status::InternalServerError, Err(err.to_string()));
     };
 
     let hash = blake3::hash(&file);
