@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use generative_art::{
     image::{self, png::PngEncoder, ImageEncoder},
@@ -54,8 +54,14 @@ pub fn post_preslav(
 
     let hash = blake3::hash(&file);
 
+    
     let processed = (*processed).clone();
     processed.insert(hash.as_bytes().to_owned(), output);
+
+    tokio::spawn(async move{
+        tokio::time::sleep(Duration::from_secs(60 * 10)).await;
+        processed.remove(hash.as_bytes()); // Might cause deadlock possibly
+    });
 
     (Status::Created, Ok(hash.as_bytes().to_vec()))
 }

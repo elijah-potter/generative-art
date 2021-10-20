@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{Arc, atomic::{AtomicU64, AtomicUsize, Ordering}};
 
 use crate::preslav::post_preslav;
 use dashmap::DashMap;
@@ -41,6 +41,12 @@ fn get_image(
     (Status::Accepted, Ok((ContentType::PNG, result)))
 }
 
+#[get("/count")]
+fn get_count(count: &State<ImageCount>) -> String{
+    let current_count = count.load(Ordering::Relaxed);
+    format!("{}", current_count)
+}
+
 #[get("/")]
 fn get_index() -> (ContentType, &'static str) {
     (ContentType::HTML, include_str!("../www/index.html"))
@@ -57,10 +63,12 @@ fn get_favicon() -> (ContentType, Vec<u8>){
 }
 
 type ProcessedImages = DashMap<[u8; 32], Vec<u8>>;
+type ImageCount = AtomicUsize;
 
 #[launch]
 fn rocket() -> _ {
     rocket::build()
         .manage(Arc::new(ProcessedImages::new()))
-        .mount("/", routes![get_index, get_font, get_favicon, get_image, post_preslav])
+        .manage(ImageCount::new(0))
+        .mount("/", routes![get_index, get_font, get_favicon, get_count, get_image, post_preslav])
 }
