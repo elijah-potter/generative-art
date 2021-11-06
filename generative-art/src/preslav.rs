@@ -5,6 +5,9 @@ use imageproc::{
 };
 use rand::{prelude::StdRng, Rng, SeedableRng};
 use std::{convert::TryInto, f64::consts::PI};
+use crate::helpers::{
+    draw_hollow_polygon_mut, regular_polygon_points
+};
 
 /// Art generator based on Preslav's Book *Generative Art in Go*
 pub struct PreslavSketcher {
@@ -98,63 +101,15 @@ impl PreslavSketcher {
             };
 
         let polygon_points =
-            Self::regular_polygon_points(dx, dy, self.stroke_size, edge_count, rng.gen());
+            regular_polygon_points(dx, dy, self.stroke_size, edge_count, rng.gen());
         draw_polygon_mut(&mut self.canvas, &polygon_points, color);
 
         if let Some(edge_color) = edge_color {
-            Self::draw_hollow_polygon_mut(&mut self.canvas, &polygon_points, edge_color);
+            draw_hollow_polygon_mut(&mut self.canvas, &polygon_points, edge_color);
         }
 
         self.stroke_size -= self.stroke_reduction * self.stroke_size;
         self.alpha += self.alpha_increase;
-    }
-
-    fn regular_polygon_points(
-        x: f64,
-        y: f64,
-        radius: f64,
-        sides: u32,
-        theta: f64,
-    ) -> Vec<Point<i32>> {
-        let mut points = Vec::with_capacity(sides as usize);
-
-        for n in 0..sides {
-            points.push(Point::new(
-                (radius * (2.0 * PI * n as f64 / sides as f64 + theta).cos() + x) as i32,
-                (radius * (2.0 * PI * n as f64 / sides as f64 + theta).sin() + y) as i32,
-            ));
-        }
-
-        if points.first() == points.last() {
-            return vec![
-                Point::new(x as i32, y as i32),
-                Point::new(x as i32 + 1, y as i32 + 1),
-            ];
-        }
-
-        points
-    }
-
-    pub fn draw_hollow_polygon_mut<C>(canvas: &mut C, poly: &[Point<i32>], color: C::Pixel)
-    where
-        C: Canvas,
-        C::Pixel: 'static,
-    {
-        for i in 0..(poly.len() - 1) {
-            draw_line_segment_mut(
-                canvas,
-                (poly[i].x as f32, poly[i].y as f32),
-                (poly[i + 1].x as f32, poly[i + 1].y as f32),
-                color,
-            )
-        }
-
-        draw_line_segment_mut(
-            canvas,
-            (poly[0].x as f32, poly[0].y as f32),
-            (poly[poly.len() - 1].x as f32, poly[poly.len() - 1].y as f32),
-            color,
-        );
     }
 
     pub fn get_canvas(&self) -> &RgbaImage {
