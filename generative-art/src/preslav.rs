@@ -5,9 +5,7 @@ use imageproc::{
 };
 use rand::{prelude::StdRng, Rng, SeedableRng};
 use std::{convert::TryInto, f64::consts::PI};
-use crate::helpers::{
-    draw_hollow_polygon_mut, regular_polygon_points
-};
+use crate::helpers::{draw_hollow_polygon_mut, regular_polygon_points};
 
 /// Art generator based on Preslav's Book *Generative Art in Go*
 pub struct PreslavSketcher {
