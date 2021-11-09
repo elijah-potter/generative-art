@@ -9,7 +9,7 @@
 	<style>
 		@font-face {
 			font-family: 'main';
-			src: url("/font") format('truetype');
+			src: url("/art/font") format('truetype');
 		}
 
 		body {
@@ -130,7 +130,7 @@
 
 				spinner.style.display = "block";
 
-				fetch('/preslav', {
+				fetch('/art/preslav', {
 					method: 'POST',
 					body: event.target.result
 				})
@@ -138,8 +138,8 @@
 					.then(ab => {
 						let hex = buf2hex(ab);
 						console.log(hex);
-						img.src = "/image/" + hex;
-						download.setAttribute("href", "/image/" + hex);
+						img.src = "/art/image/" + hex;
+						download.setAttribute("href", "/art/image/" + hex);
 						spinner.style.display = "none";
 						done.style.display = "block";
 					});
