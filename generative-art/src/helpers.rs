@@ -1,8 +1,14 @@
-use std::f64::consts::PI;
+use std::f32::consts::PI;
 
+use glam::Vec2;
 use image::GenericImage;
-use imageproc::{drawing::{Canvas, draw_antialiased_line_segment_mut, draw_line_segment_mut}, point::Point};
 use imageproc::pixelops::interpolate;
+use imageproc::{
+    drawing::{draw_antialiased_line_segment_mut, draw_line_segment_mut, Canvas},
+    point::Point,
+};
+
+use crate::convert::ToPoint;
 
 /// Draws a hollow polygon
 pub fn draw_hollow_polygon_mut<C>(canvas: &mut C, poly: &[Point<i32>], color: C::Pixel)
@@ -22,27 +28,40 @@ where
 
 /// Generates points for a regular polygon
 pub fn regular_polygon_points(
-    x: f64,
-    y: f64,
-    radius: f64,
+    position: Vec2,
+    radius: f32,
     sides: u32,
-    theta: f64,
+    theta: f32,
 ) -> Vec<Point<i32>> {
     let mut points = Vec::with_capacity(sides as usize);
 
     for n in 0..sides {
         points.push(Point::new(
-            (radius * (2.0 * PI * n as f64 / sides as f64 + theta).cos() + x) as i32,
-            (radius * (2.0 * PI * n as f64 / sides as f64 + theta).sin() + y) as i32,
+            (radius * (2.0 * PI * n as f32 / sides as f32 + theta).cos() + position.x) as i32,
+            (radius * (2.0 * PI * n as f32 / sides as f32 + theta).sin() + position.y) as i32,
         ));
     }
 
     if points.first() == points.last() {
         return vec![
-            Point::new(x as i32, y as i32),
-            Point::new(x as i32 + 1, y as i32 + 1),
+            Point::new(position.x as i32, position.y as i32),
+            Point::new(position.x as i32 + 1, position.y as i32 + 1),
         ];
     }
 
     points
+}
+
+/// Generates points to create a thick rectangular line
+pub fn thick_line_points(start: Vec2, end: Vec2, radius: f32) -> Vec<Point<i32>> {
+    let r = start - end;
+    let a = (r.x / r.y).atan();
+    let p = Vec2::new((1.5 * PI + a).sin(), (1.5 * PI + a).cos());
+
+     vec![
+        (p * radius + start).to_point(),
+        (-p * radius + start).to_point(),
+        (-p * radius + end).to_point(),
+        (p * radius + end).to_point(),
+    ]
 }
