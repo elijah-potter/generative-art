@@ -18,4 +18,4 @@ Right now, there are just two generators:
 * Celestial: simulates and renders the motion of celestial objects.
 
 ![Example of Preslav generation](./example_images/output3.jpg)
-![Example of celestial generation](./example_images/orbit.mp4)
+![Example of celestial generation](./example_images/output4.png)
