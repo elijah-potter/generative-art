@@ -10,6 +10,12 @@ use crate::{
     helpers::{regular_polygon_points, thick_line_points, RngCoreExt},
 };
 
+#[derive(Clone, Copy)]
+pub struct CenteringOptions {
+    pub max_radius_from_center: f32,
+    pub increase_mass_with_distance: bool,
+}
+
 pub struct CelestialSketcher {
     objects: Vec<CelestialObject>,
     render_count: usize,
@@ -29,8 +35,9 @@ impl CelestialSketcher {
         object_count: usize,
         object_size: Range<f32>,
         object_velocity: Range<f32>,
+        g: f32,
         foreground: Rgba<u8>,
-        max_radius_from_center: Option<f32>,
+        centering: Option<CenteringOptions>,
         render_count: usize,
     ) -> Self {
         if render_count > object_count {
@@ -44,24 +51,34 @@ impl CelestialSketcher {
         let mut total_energy = Vec2::ZERO;
 
         while objects.len() < object_count {
-            let (position, mass) = match max_radius_from_center {
-                Some(dist) => {
+            let (position, mass) = match centering {
+                Some(options) => {
+                    let dist = options.max_radius_from_center;
+
                     let center =
                         Vec2::new(canvas.width() as f32 / 2.0, canvas.height() as f32 / 2.0);
 
                     let mut position = Vec2::new(
-                        rng.gen_range(center.x - dist..center.y + dist),
+                        rng.gen_range(center.x - dist..center.x + dist),
                         rng.gen_range(center.y - dist..center.y + dist),
                     );
 
                     while center.distance(position) > dist {
                         position = Vec2::new(
-                            rng.gen_range(center.x - dist..center.y + dist),
+                            rng.gen_range(center.x - dist..center.x + dist),
                             rng.gen_range(center.y - dist..center.y + dist),
                         );
                     }
 
-                    (position, center.distance(position) / dist + object_size.start * (object_size.end - object_size.start))
+                    if options.increase_mass_with_distance {
+                        (
+                            position,
+                            center.distance(position) / dist
+                                + object_size.start * (object_size.end - object_size.start),
+                        )
+                    } else {
+                        (position, rng.gen_range(object_size.clone()))
+                    }
                 }
                 None => (
                     Vec2::new(
@@ -96,7 +113,7 @@ impl CelestialSketcher {
         Self {
             objects,
             render_count,
-            g: 0.005,
+            g,
             foreground,
             canvas,
         }
@@ -133,6 +150,10 @@ impl CelestialSketcher {
 
     pub fn get_canvas(&self) -> &RgbaImage {
         &self.canvas
+    }
+
+    pub fn get_canvas_mut(&mut self) -> &mut RgbaImage {
+        &mut self.canvas
     }
 }
 
