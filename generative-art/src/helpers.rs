@@ -7,6 +7,7 @@ use imageproc::{
     drawing::{draw_antialiased_line_segment_mut, draw_line_segment_mut, Canvas},
     point::Point,
 };
+use rand::{Rng, RngCore};
 
 use crate::convert::ToPoint;
 
@@ -58,10 +59,25 @@ pub fn thick_line_points(start: Vec2, end: Vec2, radius: f32) -> Vec<Point<i32>>
     let a = (r.x / r.y).atan();
     let p = Vec2::new((1.5 * PI + a).sin(), (1.5 * PI + a).cos());
 
-     vec![
+    vec![
         (p * radius + start).to_point(),
         (-p * radius + start).to_point(),
         (-p * radius + end).to_point(),
         (p * radius + end).to_point(),
     ]
+}
+
+pub trait RngCoreExt {
+    fn random_sign(&mut self) -> f32;
+}
+
+impl<R> RngCoreExt for R 
+where R: RngCore {
+    fn random_sign(&mut self) -> f32 {
+        if self.gen::<bool>() {
+            1.0
+        } else {
+            -1.0
+        }
+    }
 }
