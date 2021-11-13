@@ -74,16 +74,16 @@ enum Opt {
         /// Defines the number of celestial bodies in the simulation.
         object_count: usize,
         #[structopt(long, default_value = "1.0")]
-        /// Defines the minimum mass that can be assigned to a body.
+        /// Defines the minimum mass that can be assigned to a object.
         minimum_mass: f32,
         #[structopt(long, default_value = "100.0")]
-        /// Defines the maximum mass that can be assigned to a body.
+        /// Defines the maximum mass that can be assigned to a object.
         maximum_mass: f32,
         #[structopt(long, default_value = "2.0")]
-        /// Defines the minimum initial velocity that can be assigned to a body.
+        /// Defines the minimum initial velocity that can be assigned to a object.
         minimum_initial_velocity: f32,
         #[structopt(long, default_value = "1000.0")]
-        /// Defines the maximum initial velocity that can be assigned to a body.
+        /// Defines the maximum initial velocity that can be assigned to a object.
         maximum_initial_velocity: f32,
         #[structopt(short, default_value = "1.0")]
         /// Defines G.
