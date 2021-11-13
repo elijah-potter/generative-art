@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use glam::Vec2;
-use image::Rgba;
+use image::{Rgb, Rgba};
 use rand::{Rng, RngCore};
 
 /// Generates points for a regular polygon in svg format. Example: "215,200 100,100 400,100"
@@ -36,17 +36,12 @@ where
     }
 }
 
-pub trait RgbaExt {
-    fn as_hex(&self, include_alpha: bool) -> String;
+pub trait RgbExt {
+    fn as_hex(&self) -> String;
 }
 
-impl RgbaExt for Rgba<u8> {
-    fn as_hex(&self, include_alpha: bool) -> String {
-        if include_alpha {
-            format!("#{:02X}{:02X}{:02X}{:02X}", self.0[0], self.0[1], self.0[2], self.0[3])
-        }
-    else {
-            format!("#{:02X}{:02X}{:02X}", self.0[0], self.0[1], self.0[2])
-        }
+impl RgbExt for Rgb<u8> {
+    fn as_hex(&self) -> String {
+        format!("#{:02X}{:02X}{:02X}", self.0[0], self.0[1], self.0[2])
     }
 }

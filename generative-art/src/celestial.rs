@@ -1,20 +1,19 @@
 use std::{f32::consts::PI, ops::Range};
 
-use crate::helpers::RgbaExt;
 use glam::{IVec2, Vec2};
-use image::{Rgba, RgbaImage};
+use image::{Rgb, Rgba, RgbaImage};
 use rand::Rng;
 use svg::node::element::Rectangle;
 use svg::Node;
 use svg::{node::element::Circle, Document};
 
-use crate::helpers::RngCoreExt;
+use crate::helpers::{RgbExt, RngCoreExt};
 
 pub struct CelestialSketcher {
     objects: Vec<CelestialObject>,
     render_count: usize,
     g: f32,
-    foreground: Rgba<u8>,
+    foreground: Rgb<u8>,
     canvas: Document,
 }
 
@@ -30,7 +29,7 @@ impl CelestialSketcher {
         object_size: Range<f32>,
         object_velocity: Range<f32>,
         g: f32,
-        foreground: Rgba<u8>,
+        foreground: Rgb<u8>,
         max_radius_from_center: Option<f32>,
         increase_mass_with_distance: bool,
         render_count: usize,
@@ -147,7 +146,7 @@ impl CelestialSketcher {
                         .set("cx", object.position.x)
                         .set("cy", object.position.y)
                         .set("r", radius)
-                        .set("fill", self.foreground.as_hex(false)),
+                        .set("fill", self.foreground.as_hex()),
                 );
             }
         }

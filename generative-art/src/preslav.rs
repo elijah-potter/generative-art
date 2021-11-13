@@ -1,9 +1,8 @@
-use crate::helpers::{RgbaExt, regular_polygon_points};
+use crate::helpers::{regular_polygon_points, RgbExt};
 use glam::Vec2;
-use image::{Rgba, RgbaImage};
-use rand::{Rng};
-use svg::{Document, Node, node::element::Polygon};
-
+use image::{Rgb, RgbImage, Rgba, RgbaImage};
+use rand::Rng;
+use svg::{node::element::Polygon, Document, Node};
 
 /// Art generator based on Preslav's Book *Generative Art in Go*
 pub struct PreslavSketcher {
@@ -16,7 +15,7 @@ pub struct PreslavSketcher {
     pub max_edge_count: u32,
     pub stroke_size: f32,
     pub initial_stroke_size: f32,
-    canvas: Document
+    canvas: Document,
 }
 
 impl Default for PreslavSketcher {
@@ -56,7 +55,7 @@ impl PreslavSketcher {
     }
 
     /// Runs a single iteration
-    pub fn draw_iter(&mut self, input: &RgbaImage) {
+    pub fn draw_iter(&mut self, input: &RgbImage) {
         let mut rng = rand::thread_rng();
 
         let x = rng.gen_range(0.0..(input.width() as f32));
@@ -68,29 +67,28 @@ impl PreslavSketcher {
         );
 
         let edge_count = rng.gen_range(self.min_edge_count..(self.max_edge_count + 1));
-
-        let mut color = input.get_pixel(x as u32, y as u32).to_owned();
+        let color = input.get_pixel(x as u32, y as u32).to_owned();
 
         let edge_color =
             if self.stroke_size <= self.stroke_inversion_threshold * self.initial_stroke_size {
                 if color.0.iter().take(3).map(|v| *v as f32).sum::<f32>() / 3.0 < 128.0 {
-                    Some(Rgba([255, 255, 255, (self.initial_alpha * 2.0) as u8]))
+                    Some((Rgb([255, 255, 255]), (self.initial_alpha * 2.0)))
                 } else {
-                    Some(Rgba([0, 0, 0, (self.initial_alpha * 2.0) as u8]))
+                    Some((Rgb([0, 0, 0]), (self.initial_alpha * 2.0)))
                 }
             } else {
                 None
             };
 
         let polygon_points = regular_polygon_points(d, self.stroke_size, edge_count, rng.gen());
-        // draw_polygon_mut(&mut self.canvas, &polygon_points, color);
-        let mut polygon = Polygon::new().set("points", polygon_points)
-        .set("fill", color.as_hex(false))
-        .set("fill-opacity", self.initial_alpha);
+        let mut polygon = Polygon::new()
+            .set("points", polygon_points)
+            .set("fill", color.as_hex())
+            .set("fill-opacity", self.initial_alpha);
 
         if let Some(edge_color) = edge_color {
-            polygon.assign("stroke", edge_color.as_hex(false));
-            polygon.assign("stroke-opacity", edge_color.0[3]);
+            polygon.assign("stroke", edge_color.0.as_hex());
+            polygon.assign("stroke-opacity", edge_color.1);
         }
 
         self.canvas.append(polygon);
