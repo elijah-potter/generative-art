@@ -2,11 +2,10 @@ use crate::helpers::{draw_hollow_polygon_mut, regular_polygon_points};
 use glam::Vec2;
 use image::{Rgba, RgbaImage};
 use imageproc::{
-    drawing::{draw_line_segment_mut, draw_polygon_mut, Blend, Canvas},
-    point::Point,
+    drawing::{draw_polygon_mut, Blend, Canvas},
 };
-use rand::{prelude::StdRng, Rng, SeedableRng};
-use std::{convert::TryInto, f32::consts::PI};
+use rand::{Rng};
+
 
 /// Art generator based on Preslav's Book *Generative Art in Go*
 pub struct PreslavSketcher {

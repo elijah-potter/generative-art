@@ -1,13 +1,12 @@
 use std::{f32::consts::PI, ops::Range};
 
-use glam::{IVec2, Vec2};
-use image::{GenericImageView, Rgba, RgbaImage};
-use imageproc::drawing::{draw_filled_circle_mut, draw_line_segment_mut, draw_polygon_mut};
-use rand::{Rng, RngCore};
+use glam::{Vec2};
+use image::{Rgba, RgbaImage};
+use imageproc::drawing::{draw_filled_circle_mut};
+use rand::{Rng};
 
 use crate::{
-    convert::ToPoint,
-    helpers::{regular_polygon_points, RngCoreExt},
+    helpers::{RngCoreExt},
 };
 
 pub struct CelestialSketcher {

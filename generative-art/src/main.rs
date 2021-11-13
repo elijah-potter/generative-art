@@ -1,6 +1,5 @@
 use std::path::PathBuf;
 
-use image;
 use image::Pixel;
 
 use celestial::CelestialSketcher;
@@ -201,7 +200,7 @@ fn main() -> anyhow::Result<()> {
             }
 
             let mut initial_image = RgbaImage::new(width, height);
-            for (x, y, pixel) in initial_image.enumerate_pixels_mut() {
+            for (_x, _y, pixel) in initial_image.enumerate_pixels_mut() {
                 *pixel = Rgba::from_channels(0, 0, 0, 255);
             }
 

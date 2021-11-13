@@ -1,15 +1,15 @@
 use std::f32::consts::PI;
 
 use glam::Vec2;
-use image::GenericImage;
-use imageproc::pixelops::interpolate;
+
+
 use imageproc::{
-    drawing::{draw_antialiased_line_segment_mut, draw_line_segment_mut, Canvas},
+    drawing::{draw_line_segment_mut, Canvas},
     point::Point,
 };
 use rand::{Rng, RngCore};
 
-use crate::convert::ToPoint;
+
 
 /// Draws a hollow polygon
 pub fn draw_hollow_polygon_mut<C>(canvas: &mut C, poly: &[Point<i32>], color: C::Pixel)

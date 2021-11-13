@@ -1,6 +1,6 @@
 use glam::Vec2;
 use imageproc::point::Point;
-use std::convert::From;
+
 
 pub trait ToPoint<T> {
     fn to_point(self) -> Point<T>;
