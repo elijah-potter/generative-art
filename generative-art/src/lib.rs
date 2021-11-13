@@ -5,4 +5,4 @@ mod convert;
 
 pub use image;
 pub use preslav::PreslavSketcher;
-pub use celestial::{CenteringOptions, CelestialSketcher};
+pub use celestial::{CelestialSketcher};

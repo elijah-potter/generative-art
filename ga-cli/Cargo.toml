@@ -5,6 +5,8 @@ edition = "2018"
 
 [dependencies]
 indicatif = "0.16.2"
-structopt = "0.3.23"
-anyhow = "1.0.44"
+anyhow = "1.0.45"
 generative-art = {path = "../generative-art/"}
+structopt = "0.3.25"
+
+[features]

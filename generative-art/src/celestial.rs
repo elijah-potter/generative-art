@@ -10,12 +10,6 @@ use crate::{
     helpers::{regular_polygon_points, thick_line_points, RngCoreExt},
 };
 
-#[derive(Clone, Copy)]
-pub struct CenteringOptions {
-    pub max_radius_from_center: f32,
-    pub increase_mass_with_distance: bool,
-}
-
 pub struct CelestialSketcher {
     objects: Vec<CelestialObject>,
     render_count: usize,
@@ -37,7 +31,8 @@ impl CelestialSketcher {
         object_velocity: Range<f32>,
         g: f32,
         foreground: Rgba<u8>,
-        centering: Option<CenteringOptions>,
+        max_radius_from_center: Option<f32>,
+        increase_mass_with_distance: bool,
         render_count: usize,
     ) -> Self {
         if render_count > object_count {
@@ -51,10 +46,10 @@ impl CelestialSketcher {
         let mut total_energy = Vec2::ZERO;
 
         while objects.len() < object_count {
-            let (position, mass) = match centering {
-                Some(options) => {
-                    let dist = options.max_radius_from_center;
+            let mut radius = canvas.height() as f32;
 
+            let position = match max_radius_from_center {
+                Some(dist) => {
                     let center =
                         Vec2::new(canvas.width() as f32 / 2.0, canvas.height() as f32 / 2.0);
 
@@ -70,23 +65,23 @@ impl CelestialSketcher {
                         );
                     }
 
-                    if options.increase_mass_with_distance {
-                        (
-                            position,
-                            center.distance(position) / dist
-                                + object_size.start * (object_size.end - object_size.start),
-                        )
-                    } else {
-                        (position, rng.gen_range(object_size.clone()))
-                    }
+                    radius = dist;
+
+                    position
                 }
-                None => (
-                    Vec2::new(
-                        rng.gen_range(0.0..canvas.width() as f32),
-                        rng.gen_range(0.0..canvas.height() as f32),
-                    ),
-                    rng.gen_range(object_size.clone()),
+                None => Vec2::new(
+                    rng.gen_range(0.0..canvas.width() as f32),
+                    rng.gen_range(0.0..canvas.height() as f32),
                 ),
+            };
+
+            let mass = if increase_mass_with_distance {
+                let center = Vec2::new(canvas.width() as f32 / 2.0, canvas.height() as f32 / 2.0);
+
+                center.distance(position) / radius
+                    + object_size.start * (object_size.end - object_size.start)
+            } else {
+                rng.gen_range(object_size.clone())
             };
 
             let velocity = if objects.len() < object_count - 1 {

@@ -10,11 +10,10 @@ use std::{convert::TryInto, f32::consts::PI};
 
 /// Art generator based on Preslav's Book *Generative Art in Go*
 pub struct PreslavSketcher {
-    pub stroke_ratio: f32,
     pub stroke_reduction: f32,
     pub stroke_jitter: f32,
     pub stroke_inversion_threshold: f32,
-    pub alpha: f32,
+    pub initial_alpha: f32,
     pub alpha_increase: f32,
     pub min_edge_count: u32,
     pub max_edge_count: u32,
@@ -26,11 +25,10 @@ pub struct PreslavSketcher {
 impl Default for PreslavSketcher {
     fn default() -> Self {
         Self {
-            stroke_ratio: Default::default(),
             stroke_reduction: Default::default(),
             stroke_jitter: Default::default(),
             stroke_inversion_threshold: Default::default(),
-            alpha: Default::default(),
+            initial_alpha: Default::default(),
             alpha_increase: Default::default(),
             min_edge_count: Default::default(),
             max_edge_count: Default::default(),
@@ -47,11 +45,10 @@ impl PreslavSketcher {
         let initial_stroke_size = canvas.width() as f32 / 4.0;
 
         Self {
-            stroke_ratio: 0.75,
             stroke_reduction: initial_stroke_size / 70.0 / expected_iterations as f32,
             stroke_jitter: 0.1 * canvas.width() as f32,
             stroke_inversion_threshold: 0.05,
-            alpha: 70.0,
+            initial_alpha: 70.0,
             alpha_increase: (256.0 - 70.0) / expected_iterations as f32,
             min_edge_count: 3,
             max_edge_count: 4,
@@ -76,14 +73,14 @@ impl PreslavSketcher {
         let edge_count = rng.gen_range(self.min_edge_count..(self.max_edge_count + 1));
 
         let mut color = input.get_pixel(x as u32, y as u32).to_owned();
-        color.0[3] = self.alpha as u8;
+        color.0[3] = self.initial_alpha as u8;
 
         let edge_color =
             if self.stroke_size <= self.stroke_inversion_threshold * self.initial_stroke_size {
                 if color.0.iter().take(3).map(|v| *v as f32).sum::<f32>() / 3.0 < 128.0 {
-                    Some(Rgba([255, 255, 255, (self.alpha * 2.0) as u8]))
+                    Some(Rgba([255, 255, 255, (self.initial_alpha * 2.0) as u8]))
                 } else {
-                    Some(Rgba([0, 0, 0, (self.alpha * 2.0) as u8]))
+                    Some(Rgba([0, 0, 0, (self.initial_alpha * 2.0) as u8]))
                 }
             } else {
                 None
@@ -97,7 +94,7 @@ impl PreslavSketcher {
         }
 
         self.stroke_size -= self.stroke_reduction * self.stroke_size;
-        self.alpha += self.alpha_increase;
+        self.initial_alpha += self.alpha_increase;
     }
 
     pub fn get_canvas(&self) -> &RgbaImage {
