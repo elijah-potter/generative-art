@@ -3,18 +3,18 @@ use std::path::PathBuf;
 use image;
 use image::Pixel;
 
+use celestial::CelestialSketcher;
 use image::Rgba;
 use image::RgbaImage;
-use celestial::CelestialSketcher;
 
-mod preslav;
-mod helpers;
 mod celestial;
 mod convert;
+mod helpers;
+mod preslav;
 
 use indicatif::ProgressBar;
-use structopt::StructOpt;
 use preslav::PreslavSketcher;
+use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Art")]
@@ -189,12 +189,12 @@ fn main() -> anyhow::Result<()> {
                 println!("The minimum-mass cannot be greater than the maximum-mass.");
                 return Ok(());
             }
-            if minimum_initial_velocity > maximum_initial_velocity{
+            if minimum_initial_velocity > maximum_initial_velocity {
                 println!("The minimum-initial-velocity cannot be greater than the maximum-initial-velocity.");
                 return Ok(());
             }
-            if let Some(render_count) = render_count{
-                if render_count > object_count{
+            if let Some(render_count) = render_count {
+                if render_count > object_count {
                     println!("The render-count cannot be greater than the object-count.");
                     return Ok(());
                 }
