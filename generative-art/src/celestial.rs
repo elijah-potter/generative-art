@@ -7,7 +7,7 @@ use rand::{Rng, RngCore};
 
 use crate::{
     convert::ToPoint,
-    helpers::{regular_polygon_points, thick_line_points, RngCoreExt},
+    helpers::{regular_polygon_points, RngCoreExt},
 };
 
 pub struct CelestialSketcher {

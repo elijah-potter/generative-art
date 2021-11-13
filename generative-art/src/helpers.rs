@@ -53,20 +53,6 @@ pub fn regular_polygon_points(
     points
 }
 
-/// Generates points to create a thick rectangular line
-pub fn thick_line_points(start: Vec2, end: Vec2, radius: f32) -> Vec<Point<i32>> {
-    let r = start - end;
-    let a = (r.x / r.y).atan();
-    let p = Vec2::new((1.5 * PI + a).sin(), (1.5 * PI + a).cos());
-
-    vec![
-        (p * radius + start).to_point(),
-        (-p * radius + start).to_point(),
-        (-p * radius + end).to_point(),
-        (p * radius + end).to_point(),
-    ]
-}
-
 pub trait RngCoreExt {
     fn random_sign(&mut self) -> f32;
 }

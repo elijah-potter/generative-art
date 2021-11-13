@@ -1,15 +1,20 @@
 use std::path::PathBuf;
 
-use generative_art::image;
-use generative_art::image::Pixel;
-use generative_art::PreslavSketcher;
+use image;
+use image::Pixel;
 
-use generative_art::image::Rgba;
-use generative_art::image::RgbaImage;
-use generative_art::CelestialSketcher;
+use image::Rgba;
+use image::RgbaImage;
+use celestial::CelestialSketcher;
+
+mod preslav;
+mod helpers;
+mod celestial;
+mod convert;
 
 use indicatif::ProgressBar;
 use structopt::StructOpt;
+use preslav::PreslavSketcher;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Art")]
