@@ -2,12 +2,19 @@
 
 This is my personal project for making Generative Art.
 
+## Installation
+
+There are getting the binary. You can either download from the [releases page,](https://github.com/chilipepperhott/generative-art/releases) or, if you have `cargo` installed, you can run:
+
+```bash
+cargo install --git https://github.com/chilipepperhott/generative-art generative-art
+```
+
 ## Structure
 
-There are three crates: 
+There are two crates: 
 
 * generative-art: algorithms for generation.
-* ga-cli: a command line interface.
 * ga-web: a web interface for the project. You can try it out on [my website](https://elijahpotter.dev/art).
 
 ### Generative art
