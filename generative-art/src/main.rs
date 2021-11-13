@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use glam::Vec2;
 use image::Pixel;
 
 use celestial::CelestialSketcher;
@@ -7,7 +8,6 @@ use image::Rgba;
 use image::RgbaImage;
 
 mod celestial;
-mod convert;
 mod helpers;
 mod preslav;
 
@@ -22,7 +22,7 @@ enum Opt {
         #[structopt(parse(from_os_str))]
         /// Name of file to use as input
         input: PathBuf,
-        #[structopt(short, long, parse(from_os_str), default_value = "generated.png")]
+        #[structopt(short, long, parse(from_os_str), default_value = "generated.svg")]
         /// Name of file to save generated art to.
         /// If not specified, the result will be writted to "generated.png".
         output: PathBuf,
@@ -41,8 +41,9 @@ enum Opt {
         #[structopt(long, default_value = "0.05")]
         /// The maximum threshold at which the program will begin drawing edges on the shapes.
         stroke_inversion_threshold: f32,
-        #[structopt(long, default_value = "70.0")]
+        #[structopt(long, default_value = "0.274")]
         /// The alpha the program will start at (background shapes).
+        /// This is in the space 0.0..1.0.
         initial_alpha: f32,
         #[structopt(long)]
         /// How much the alpha of each shape should increase by each iteration.
@@ -61,7 +62,7 @@ enum Opt {
         iterations: usize,
     },
     Celestial {
-        #[structopt(short, long, default_value = "celestial.png")]
+        #[structopt(short, long, default_value = "celestial.svg")]
         /// The file to render to.
         output: PathBuf,
         #[structopt(short, long, default_value = "1000")]
@@ -141,7 +142,7 @@ fn main() -> anyhow::Result<()> {
 
             let bar = ProgressBar::new(iterations as u64);
 
-            let mut sketcher = PreslavSketcher::new_preslav(in_image.to_owned(), iterations);
+            let mut sketcher = PreslavSketcher::new_preslav(in_image.width() as f32, iterations);
             if let Some(initial_stroke_size) = initial_stroke_size {
                 sketcher.initial_stroke_size = initial_stroke_size;
             }
@@ -163,7 +164,8 @@ fn main() -> anyhow::Result<()> {
                 bar.inc(1);
                 sketcher.draw_iter(&in_image);
             }
-            sketcher.get_canvas().save(output)?;
+
+            svg::save(output, sketcher.get_canvas())?;
 
             bar.finish();
         }
@@ -205,7 +207,7 @@ fn main() -> anyhow::Result<()> {
             }
 
             let mut sketcher = CelestialSketcher::new(
-                initial_image,
+                Vec2::new(width as f32, height as f32),
                 object_count,
                 minimum_mass..maximum_mass,
                 minimum_initial_velocity..maximum_initial_velocity,
@@ -237,7 +239,7 @@ fn main() -> anyhow::Result<()> {
                 sketcher.draw_iter(step_size);
             }
 
-            sketcher.get_canvas().save(output)?;
+            svg::save(output, sketcher.get_canvas())?;
         }
     }
 

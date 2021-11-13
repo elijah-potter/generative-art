@@ -16,9 +16,9 @@ image = { version = "0.23.14", default-features = false, features = [
     "tiff",
     "bmp",
 ] }
-imageproc = { version = "0.22.0", default-features = false }
 indicatif = "0.16.2"
 rand = { version = "0.8.4" }
 structopt = "0.3.25"
+svg = "0.10.0"
 
 [features]

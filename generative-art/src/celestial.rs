@@ -1,20 +1,21 @@
 use std::{f32::consts::PI, ops::Range};
 
-use glam::{Vec2};
+use crate::helpers::RgbaExt;
+use glam::{IVec2, Vec2};
 use image::{Rgba, RgbaImage};
-use imageproc::drawing::{draw_filled_circle_mut};
-use rand::{Rng};
+use rand::Rng;
+use svg::node::element::Rectangle;
+use svg::Node;
+use svg::{node::element::Circle, Document};
 
-use crate::{
-    helpers::{RngCoreExt},
-};
+use crate::helpers::RngCoreExt;
 
 pub struct CelestialSketcher {
     objects: Vec<CelestialObject>,
     render_count: usize,
     g: f32,
     foreground: Rgba<u8>,
-    canvas: RgbaImage,
+    canvas: Document,
 }
 
 impl CelestialSketcher {
@@ -24,7 +25,7 @@ impl CelestialSketcher {
     /// Allows to define how many of the simulated objects are rendered.
     /// If the render count is greater than the object count, it panics.
     pub fn new(
-        canvas: RgbaImage,
+        output_size: Vec2,
         object_count: usize,
         object_size: Range<f32>,
         object_velocity: Range<f32>,
@@ -45,12 +46,11 @@ impl CelestialSketcher {
         let mut total_energy = Vec2::ZERO;
 
         while objects.len() < object_count {
-            let mut radius = canvas.height() as f32;
+            let mut radius = output_size.y;
 
             let position = match max_radius_from_center {
                 Some(dist) => {
-                    let center =
-                        Vec2::new(canvas.width() as f32 / 2.0, canvas.height() as f32 / 2.0);
+                    let center = Vec2::new(output_size.x / 2.0, output_size.y / 2.0);
 
                     let mut position = Vec2::new(
                         rng.gen_range(center.x - dist..center.x + dist),
@@ -69,13 +69,13 @@ impl CelestialSketcher {
                     position
                 }
                 None => Vec2::new(
-                    rng.gen_range(0.0..canvas.width() as f32),
-                    rng.gen_range(0.0..canvas.height() as f32),
+                    rng.gen_range(0.0..output_size.x),
+                    rng.gen_range(0.0..output_size.y),
                 ),
             };
 
             let mass = if increase_mass_with_distance {
-                let center = Vec2::new(canvas.width() as f32 / 2.0, canvas.height() as f32 / 2.0);
+                let center = Vec2::new(output_size.x / 2.0, output_size.y / 2.0);
 
                 center.distance(position) / radius
                     + object_size.start * (object_size.end - object_size.start)
@@ -103,6 +103,16 @@ impl CelestialSketcher {
                 mass,
             });
         }
+
+        let canvas = Document::new()
+            .add(
+                Rectangle::new()
+                    .set("fill", "#000")
+                    .set("width", output_size.x)
+                    .set("height", output_size.y),
+            )
+            .set("width", output_size.x)
+            .set("height", output_size.y);
 
         Self {
             objects,
@@ -132,21 +142,22 @@ impl CelestialSketcher {
             let radius = (object.mass / PI).sqrt();
 
             if index < self.render_count {
-                draw_filled_circle_mut(
-                    &mut self.canvas,
-                    (object.position.x as i32, object.position.y as i32),
-                    radius as i32,
-                    self.foreground,
+                self.canvas.append(
+                    Circle::new()
+                        .set("cx", object.position.x)
+                        .set("cy", object.position.y)
+                        .set("r", radius)
+                        .set("fill", self.foreground.as_hex(false)),
                 );
             }
         }
     }
 
-    pub fn get_canvas(&self) -> &RgbaImage {
+    pub fn get_canvas(&self) -> &Document {
         &self.canvas
     }
 
-    pub fn get_canvas_mut(&mut self) -> &mut RgbaImage {
+    pub fn get_canvas_mut(&mut self) -> &mut Document {
         &mut self.canvas
     }
 }
