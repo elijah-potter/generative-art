@@ -4,6 +4,7 @@ use glam::Vec2;
 use image::Pixel;
 
 use celestial::CelestialSketcher;
+use image::Rgb;
 use image::Rgba;
 use image::RgbaImage;
 
@@ -138,11 +139,11 @@ fn main() -> anyhow::Result<()> {
             }
 
             let in_image = image::open(input)?;
-            let in_image = in_image.into_rgba8();
+            let in_image = in_image.into_rgb8();
 
             let bar = ProgressBar::new(iterations as u64);
 
-            let mut sketcher = PreslavSketcher::new_preslav(in_image.width() as f32, iterations);
+            let mut sketcher = PreslavSketcher::new_preslav(Vec2::new(in_image.width() as f32, in_image.height() as f32), iterations);
             if let Some(initial_stroke_size) = initial_stroke_size {
                 sketcher.initial_stroke_size = initial_stroke_size;
             }
@@ -212,7 +213,7 @@ fn main() -> anyhow::Result<()> {
                 minimum_mass..maximum_mass,
                 minimum_initial_velocity..maximum_initial_velocity,
                 g,
-                Rgba::from_channels(255, 255, 255, 255),
+                Rgb::from_channels(255, 255, 255, 255),
                 maximum_radius_from_center,
                 increase_mass_with_distance,
                 render_count.unwrap_or(object_count),

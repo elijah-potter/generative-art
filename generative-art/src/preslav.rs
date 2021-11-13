@@ -2,7 +2,7 @@ use crate::helpers::{regular_polygon_points, RgbExt};
 use glam::Vec2;
 use image::{Rgb, RgbImage, Rgba, RgbaImage};
 use rand::Rng;
-use svg::{node::element::Polygon, Document, Node};
+use svg::{Document, Node, node::element::{Polygon, Rectangle}};
 
 /// Art generator based on Preslav's Book *Generative Art in Go*
 pub struct PreslavSketcher {
@@ -37,12 +37,12 @@ impl Default for PreslavSketcher {
 
 impl PreslavSketcher {
     /// Create a new sketcher with default values based on Preslav Rachev's suggestions
-    pub fn new_preslav(expected_width: f32, expected_iterations: usize) -> Self {
-        let initial_stroke_size = expected_width / 4.0;
+    pub fn new_preslav(output_size: Vec2, expected_iterations: usize) -> Self {
+        let initial_stroke_size = output_size.x / 4.0;
 
         Self {
             stroke_reduction: initial_stroke_size / 70.0 / expected_iterations as f32,
-            stroke_jitter: 0.1 * expected_width,
+            stroke_jitter: 0.1 * output_size.x,
             stroke_inversion_threshold: 0.05,
             initial_alpha: 0.274,
             alpha_increase: (1.0 - 0.274) / expected_iterations as f32,
@@ -50,7 +50,15 @@ impl PreslavSketcher {
             max_edge_count: 4,
             stroke_size: initial_stroke_size,
             initial_stroke_size,
-            canvas: Document::new(),
+            canvas: Document::new()
+                .add(
+                    Rectangle::new()
+                        .set("fill", "#000")
+                        .set("width", output_size.x)
+                        .set("height", output_size.y),
+                )
+                .set("width", output_size.x)
+                .set("height", output_size.y),
         }
     }
 
