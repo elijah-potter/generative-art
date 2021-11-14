@@ -3,7 +3,7 @@ use std::{f32::consts::PI, ops::Range};
 use glam::Vec2;
 use image::Rgb;
 use rand::Rng;
-use svg::node::element::{Path, Polyline, Rectangle};
+use svg::node::element::{Polyline};
 use svg::Node;
 use svg::{node::element::Circle, Document};
 
@@ -171,7 +171,7 @@ impl CelestialSketcher {
         let previous_state: Vec<(Vec2, f32)> =
             self.objects.iter().map(|v| (v.position, v.mass)).collect();
 
-        for (index, object) in self.objects.iter_mut().enumerate() {
+        for (_index, object) in self.objects.iter_mut().enumerate() {
             let mut force = Vec2::ZERO;
             for other_object in &previous_state {
                 if object.position != other_object.0 {

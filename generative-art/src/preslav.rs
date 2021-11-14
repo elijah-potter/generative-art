@@ -3,7 +3,7 @@ use glam::Vec2;
 use image::{Rgb, RgbImage};
 use rand::Rng;
 use svg::{
-    node::element::{Polygon, Rectangle},
+    node::element::{Polygon},
     Document, Node,
 };
 

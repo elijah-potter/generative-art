@@ -224,7 +224,7 @@ fn main() -> anyhow::Result<()> {
 
             println!("Simulating...");
 
-            for i in (0..steps).progress() {
+            for _i in (0..steps).progress() {
                 sketcher.step(step_size);
             }
 
