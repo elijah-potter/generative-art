@@ -24,5 +24,5 @@ Right now, there are just two generators:
 * Preslav: the Rust implementation of Preslav Rachev's book *Generative Art in Go*.
 * Celestial: simulates and renders the motion of celestial objects.
 
-![Example of Preslav generation](./example_images/celestial.svg)
-![Example of celestial generation](./example_images/preslav.svg)
+![Example of Preslav generation](./example_images/preslav.svg)
+![Example of celestial generation](./example_images/celestial.svg)
