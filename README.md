@@ -4,7 +4,7 @@ This is my personal project for making Generative Art.
 
 ## Installation
 
-There are getting the binary. You can either download from the [releases page,](https://github.com/chilipepperhott/generative-art/releases) or, if you have `cargo` installed, you can run:
+There are two ways of getting the binary. You can either download from the [releases page,](https://github.com/chilipepperhott/generative-art/releases) or, if you have `cargo` installed, you can run:
 
 ```bash
 cargo install --git https://github.com/chilipepperhott/generative-art generative-art
