@@ -82,10 +82,10 @@ enum Opt {
         object_count: usize,
         #[structopt(long, default_value = "1.0")]
         /// Defines the minimum mass that can be assigned to a object.
-        minimum_mass: f32,
+        min_mass: f32,
         #[structopt(long, default_value = "100.0")]
         /// Defines the maximum mass that can be assigned to a object.
-        maximum_mass: f32,
+        max_mass: f32,
         #[structopt(long, default_value = "2.0")]
         /// Defines the minimum initial velocity that can be assigned to a object.
         minimum_initial_velocity: f32,
@@ -183,8 +183,8 @@ fn main() -> anyhow::Result<()> {
             width,
             height,
             object_count,
-            minimum_mass,
-            maximum_mass,
+            min_mass,
+            max_mass,
             minimum_initial_velocity,
             maximum_initial_velocity,
             g,
@@ -196,7 +196,7 @@ fn main() -> anyhow::Result<()> {
             step_size,
         } => {
             // Verify that inputs are valid.
-            if minimum_mass > maximum_mass {
+            if min_mass > max_mass {
                 println!("The minimum-mass cannot be greater than the maximum-mass.");
                 return Ok(());
             }
@@ -219,7 +219,7 @@ fn main() -> anyhow::Result<()> {
             let mut sketcher = CelestialSketcher::new(CelestialSketcherSettings {
                 output_size: Vec2::new(width as f32, height as f32),
                 object_count,
-                object_size: minimum_mass..maximum_mass,
+                object_size: min_mass..max_mass,
                 object_velocity: minimum_initial_velocity..maximum_initial_velocity,
                 g,
                 foreground: Rgb::from_channels(255, 255, 255, 255),
