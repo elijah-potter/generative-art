@@ -143,7 +143,10 @@ fn main() -> anyhow::Result<()> {
 
             let bar = ProgressBar::new(iterations as u64);
 
-            let mut sketcher = PreslavSketcher::new_preslav(Vec2::new(in_image.width() as f32, in_image.height() as f32), iterations);
+            let mut sketcher = PreslavSketcher::new_preslav(
+                Vec2::new(in_image.width() as f32, in_image.height() as f32),
+                iterations,
+            );
             if let Some(initial_stroke_size) = initial_stroke_size {
                 sketcher.initial_stroke_size = initial_stroke_size;
             }

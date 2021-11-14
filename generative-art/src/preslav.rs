@@ -2,7 +2,10 @@ use crate::helpers::{regular_polygon_points, RgbExt};
 use glam::Vec2;
 use image::{Rgb, RgbImage, Rgba, RgbaImage};
 use rand::Rng;
-use svg::{Document, Node, node::element::{Polygon, Rectangle}};
+use svg::{
+    node::element::{Polygon, Rectangle},
+    Document, Node,
+};
 
 /// Art generator based on Preslav's Book *Generative Art in Go*
 pub struct PreslavSketcher {
