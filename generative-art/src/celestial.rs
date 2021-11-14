@@ -3,11 +3,11 @@ use std::{f32::consts::PI, ops::Range};
 use glam::Vec2;
 use image::Rgb;
 use rand::Rng;
-use svg::node::element::{Polyline};
+use svg::node::element::Polyline;
 use svg::Node;
 use svg::{node::element::Circle, Document};
 
-use crate::helpers::{RgbExt, RngCoreExt, clean_canvas};
+use crate::helpers::{clean_canvas, RgbExt, RngCoreExt};
 
 pub struct CelestialSketcherSettings {
     pub output_size: Vec2,

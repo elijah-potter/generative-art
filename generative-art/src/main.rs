@@ -151,11 +151,12 @@ fn main() -> anyhow::Result<()> {
 
             let dimensions = Vec2::new(in_image.width() as f32, in_image.height() as f32);
 
-            let settings = PreslavSketcherSettings{
+            let settings = PreslavSketcherSettings {
                 output_size: dimensions,
                 expected_iterations: steps,
-                stroke_reduction: stroke_reduction.unwrap_or_else(|| dimensions.x / 4.0 / 70.0 / steps as f32),
-                stroke_jitter: stroke_jitter.unwrap_or_else(||0.1 * dimensions.x),
+                stroke_reduction: stroke_reduction
+                    .unwrap_or_else(|| dimensions.x / 4.0 / 70.0 / steps as f32),
+                stroke_jitter: stroke_jitter.unwrap_or_else(|| 0.1 * dimensions.x),
                 stroke_inversion_threshold,
                 initial_alpha,
                 alpha_increase: alpha_increase.unwrap_or_else(|| (1.0 - 0.274) / steps as f32),
@@ -170,7 +171,12 @@ fn main() -> anyhow::Result<()> {
                 sketcher.step(&in_image);
             }
 
-            save(&sketcher.render(), &output, in_image.width(), in_image.height())?;
+            save(
+                &sketcher.render(),
+                &output,
+                in_image.width(),
+                in_image.height(),
+            )?;
         }
         Opt::Celestial {
             output,
@@ -253,11 +259,7 @@ fn save(canvas: &Document, path: &Path, width: u32, height: u32) -> anyhow::Resu
             "svg" => {
                 svg::save(path, canvas)?;
             }
-            "bmp" |
-            "jpg" |
-            "jpeg" |
-            "png" |
-            "tiff" => {
+            "bmp" | "jpg" | "jpeg" | "png" | "tiff" => {
                 let options = usvg::Options::default();
                 let tree = usvg::Tree::from_str(&canvas.to_string(), &options.to_ref()).unwrap();
                 let mut pixmap = tiny_skia::Pixmap::new(width, height).unwrap();

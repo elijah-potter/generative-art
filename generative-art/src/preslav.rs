@@ -1,11 +1,8 @@
-use crate::helpers::{RgbExt, clean_canvas, regular_polygon_points};
+use crate::helpers::{clean_canvas, regular_polygon_points, RgbExt};
 use glam::Vec2;
 use image::{Rgb, RgbImage};
 use rand::Rng;
-use svg::{
-    node::element::{Polygon},
-    Document, Node,
-};
+use svg::{node::element::Polygon, Document, Node};
 
 pub struct PreslavSketcherSettings {
     pub output_size: Vec2,
@@ -36,7 +33,7 @@ pub struct PreslavSketcher {
 
 impl PreslavSketcher {
     pub fn new(settings: &PreslavSketcherSettings) -> Self {
-        Self{
+        Self {
             stroke_reduction: settings.stroke_reduction,
             stroke_jitter: settings.stroke_jitter,
             stroke_inversion_threshold: settings.stroke_inversion_threshold,
@@ -46,7 +43,7 @@ impl PreslavSketcher {
             max_edge_count: settings.max_edge_count,
             stroke_size: settings.initial_stroke_size,
             initial_stroke_size: settings.initial_stroke_size,
-            canvas: clean_canvas(settings.output_size)
+            canvas: clean_canvas(settings.output_size),
         }
     }
 
