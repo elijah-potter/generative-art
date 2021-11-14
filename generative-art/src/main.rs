@@ -167,7 +167,11 @@ fn main() -> anyhow::Result<()> {
 
             let mut sketcher = PreslavSketcher::new(&settings);
 
-            for _ in (0..steps).progress() {
+            let step_iter = 0..steps;
+            #[cfg(not(target_arch = "wasm32"))]
+            let step_iter = step_iter.progress();
+
+            for _i in step_iter {
                 sketcher.step(&in_image);
             }
 
@@ -230,20 +234,27 @@ fn main() -> anyhow::Result<()> {
 
             println!("Simulating...");
 
-            for _i in (0..steps).progress() {
+            let step_iter = 0..steps;
+            #[cfg(not(target_arch = "wasm32"))]
+            let step_iter = step_iter.progress();
+
+            for _i in step_iter {
                 sketcher.step(step_size);
             }
 
             println!("Rendering...");
 
-            std::thread::spawn(|| {
-                let spinner = ProgressBar::new_spinner();
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                std::thread::spawn(|| {
+                    let spinner = ProgressBar::new_spinner();
 
-                loop {
-                    spinner.tick();
-                    std::thread::sleep(Duration::from_millis(100));
-                }
-            });
+                    loop {
+                        spinner.tick();
+                        std::thread::sleep(Duration::from_millis(100));
+                    }
+                });
+            }
 
             let sketch = sketcher.render(0..steps, 0..render_count.unwrap_or(object_count), dots);
             save(&sketch, &output, width, height)?;

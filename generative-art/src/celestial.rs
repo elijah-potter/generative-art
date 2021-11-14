@@ -120,6 +120,7 @@ impl CelestialSketcher {
 
     /// Renders the path of a given range of objects within a given a range of time.
     /// Allows to choose between rendering lines for path, or rendering dots at each time step.
+    /// Won't do anything for frame that haven't been simulated.
     pub fn render(
         &mut self,
         steps: Range<usize>,
@@ -134,21 +135,21 @@ impl CelestialSketcher {
             let mut polyline = String::new();
 
             for s in steps.clone() {
-                let object_pos = object.path[s];
-
-                if dots {
-                    // Only add dot if it will be visible on output.
-                    if self.inside_view(object_pos, radius) {
-                        canvas.append(
-                            Circle::new()
-                                .set("cx", object_pos.x)
-                                .set("cy", object_pos.y)
-                                .set("r", radius)
-                                .set("fill", self.foreground.as_hex()),
-                        );
+                if let Some(object_pos) = object.path.get(s).map(|v| v.to_owned()) {
+                    if dots {
+                        // Only add dot if it will be visible on output.
+                        if self.inside_view(object_pos, radius) {
+                            canvas.append(
+                                Circle::new()
+                                    .set("cx", object_pos.x)
+                                    .set("cy", object_pos.y)
+                                    .set("r", radius)
+                                    .set("fill", self.foreground.as_hex()),
+                            );
+                        }
+                    } else {
+                        polyline.push_str(&format!("{},{} ", object_pos.x, object_pos.y))
                     }
-                } else {
-                    polyline.push_str(&format!("{},{} ", object_pos.x, object_pos.y))
                 }
             }
 
