@@ -65,8 +65,7 @@ impl PreslavSketcher {
         }
     }
 
-    /// Runs a single iteration
-    pub fn draw_iter(&mut self, input: &RgbImage) {
+    pub fn step(&mut self, input: &RgbImage) {
         let mut rng = rand::thread_rng();
 
         let x = rng.gen_range(0.0..(input.width() as f32));

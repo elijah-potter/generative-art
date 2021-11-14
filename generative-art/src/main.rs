@@ -1,5 +1,8 @@
+use std::path::Path;
 use std::path::PathBuf;
+use std::time::Duration;
 
+use celestial::CelestialSketcherSettings;
 use glam::Vec2;
 use image::Pixel;
 
@@ -13,8 +16,10 @@ mod helpers;
 mod preslav;
 
 use indicatif::ProgressBar;
+use indicatif::ProgressIterator;
 use preslav::PreslavSketcher;
 use structopt::StructOpt;
+use svg::Document;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Art")]
@@ -97,15 +102,18 @@ enum Opt {
         #[structopt(long)]
         /// Whether to increase the initial mass of the bodies the further they are instantiated from the center of the image.
         increase_mass_with_distance: bool,
+        #[structopt(short, long)]
+        /// Whether to render dots instead of paths.
+        dots: bool,
         #[structopt(long)]
         /// How many of the objects in the simulation will be rendered.
         /// By default, this is equal to object-count.
         /// This must be less than or equal to object-count.
         render_count: Option<usize>,
-        #[structopt(short, long, default_value = "100000")]
+        #[structopt(short, long, default_value = "10000")]
         /// How many steps the simulation is run.
         steps: usize,
-        #[structopt(long, default_value = "0.0005")]
+        #[structopt(long, default_value = "0.005")]
         /// How much time passes between steps.
         step_size: f32,
     },
@@ -141,8 +149,6 @@ fn main() -> anyhow::Result<()> {
             let in_image = image::open(input)?;
             let in_image = in_image.into_rgb8();
 
-            let bar = ProgressBar::new(iterations as u64);
-
             let mut sketcher = PreslavSketcher::new_preslav(
                 Vec2::new(in_image.width() as f32, in_image.height() as f32),
                 iterations,
@@ -164,14 +170,11 @@ fn main() -> anyhow::Result<()> {
             sketcher.min_edge_count = min_edge_count;
             sketcher.max_edge_count = max_edge_count;
 
-            for _ in 0..iterations {
-                bar.inc(1);
-                sketcher.draw_iter(&in_image);
+            for _ in (0..iterations).progress() {
+                sketcher.step(&in_image);
             }
 
-            svg::save(output, sketcher.get_canvas())?;
-
-            bar.finish();
+            save(sketcher.get_canvas(), &output, in_image.width(), in_image.height())?;
         }
         Opt::Celestial {
             output,
@@ -183,8 +186,9 @@ fn main() -> anyhow::Result<()> {
             minimum_initial_velocity,
             maximum_initial_velocity,
             g,
-            maximum_radius_from_center,
+            maximum_radius_from_center: max_radius_from_center,
             increase_mass_with_distance,
+            dots,
             render_count,
             steps,
             step_size,
@@ -210,41 +214,66 @@ fn main() -> anyhow::Result<()> {
                 *pixel = Rgba::from_channels(0, 0, 0, 255);
             }
 
-            let mut sketcher = CelestialSketcher::new(
-                Vec2::new(width as f32, height as f32),
+            let mut sketcher = CelestialSketcher::new(CelestialSketcherSettings {
+                output_size: Vec2::new(width as f32, height as f32),
                 object_count,
-                minimum_mass..maximum_mass,
-                minimum_initial_velocity..maximum_initial_velocity,
+                object_size: minimum_mass..maximum_mass,
+                object_velocity: minimum_initial_velocity..maximum_initial_velocity,
                 g,
-                Rgb::from_channels(255, 255, 255, 255),
-                maximum_radius_from_center,
+                foreground: Rgb::from_channels(255, 255, 255, 255),
+                max_radius_from_center,
                 increase_mass_with_distance,
-                render_count.unwrap_or(object_count),
-            );
+                expected_steps: steps,
+            });
 
-            let bar = ProgressBar::new(steps as u64);
+            println!("Simulating...");
 
-            for i in 0..steps {
-                if i % (steps / 1000) == 0 {
-                    bar.inc(steps as u64 / 1000);
-                }
-
-                // if i % 111 == 0 {
-                //     *sketcher.get_canvas_mut() =
-                //         generative_art::image::imageops::blur(sketcher.get_canvas(), 1.0);
-                //     *sketcher.get_canvas_mut() =
-                //         generative_art::image::imageops::brighten(sketcher.get_canvas(), -1);
-
-                //     sketcher
-                //         .get_canvas()
-                //         .save(format!("images/{}.bmp", i / 111))?;
-                // }
-
-                sketcher.draw_iter(step_size);
+            for i in (0..steps).progress() {
+                sketcher.step(step_size);
             }
 
-            svg::save(output, sketcher.get_canvas())?;
+            println!("Rendering...");
+
+            std::thread::spawn(|| {
+                let spinner = ProgressBar::new_spinner();
+
+                loop {
+                    spinner.tick();
+                    std::thread::sleep(Duration::from_millis(100));
+                }
+            });
+
+            let sketch = sketcher.render(0..steps, 0..render_count.unwrap_or(object_count), dots);
+            save(&sketch, &output, width, height)?;
         }
+    }
+
+    Ok(())
+}
+
+fn save(canvas: &Document, path: &Path, width: u32, height: u32) -> anyhow::Result<()> {
+    if let Some(extension) = path.extension() {
+        match extension.to_str().unwrap() {
+            "svg" => {
+                svg::save(path, canvas)?;
+            }
+            "bmp" |
+            "jpg" |
+            "jpeg" |
+            "png" |
+            "tiff" => {
+                let options = usvg::Options::default();
+                let tree = usvg::Tree::from_str(&canvas.to_string(), &options.to_ref()).unwrap();
+                let mut pixmap = tiny_skia::Pixmap::new(width, height).unwrap();
+                resvg::render(&tree, usvg::FitTo::Original, pixmap.as_mut()).unwrap();
+
+                let image = RgbaImage::from_raw(width, height, pixmap.data().to_owned()).unwrap();
+                image.save(path)?;
+            }
+            _ => println!("Couldn't save with that extension."),
+        }
+    } else {
+        println!("Couldn't save with that extension.")
     }
 
     Ok(())
