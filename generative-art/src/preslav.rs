@@ -1,4 +1,4 @@
-use crate::helpers::{regular_polygon_points, RgbExt};
+use crate::helpers::{RgbExt, clean_canvas, regular_polygon_points};
 use glam::Vec2;
 use image::{Rgb, RgbImage};
 use rand::Rng;
@@ -7,8 +7,9 @@ use svg::{
     Document, Node,
 };
 
-/// Art generator based on Preslav's Book *Generative Art in Go*
-pub struct PreslavSketcher {
+pub struct PreslavSketcherSettings {
+    pub output_size: Vec2,
+    pub expected_iterations: usize,
     pub stroke_reduction: f32,
     pub stroke_jitter: f32,
     pub stroke_inversion_threshold: f32,
@@ -16,52 +17,36 @@ pub struct PreslavSketcher {
     pub alpha_increase: f32,
     pub min_edge_count: u32,
     pub max_edge_count: u32,
-    pub stroke_size: f32,
     pub initial_stroke_size: f32,
+}
+
+/// Art generator based on Preslav's Book *Generative Art in Go*
+pub struct PreslavSketcher {
+    stroke_reduction: f32,
+    stroke_jitter: f32,
+    stroke_inversion_threshold: f32,
+    initial_alpha: f32,
+    alpha_increase: f32,
+    min_edge_count: u32,
+    max_edge_count: u32,
+    stroke_size: f32,
+    initial_stroke_size: f32,
     canvas: Document,
 }
 
-impl Default for PreslavSketcher {
-    fn default() -> Self {
-        Self {
-            stroke_reduction: Default::default(),
-            stroke_jitter: Default::default(),
-            stroke_inversion_threshold: Default::default(),
-            initial_alpha: Default::default(),
-            alpha_increase: Default::default(),
-            min_edge_count: Default::default(),
-            max_edge_count: Default::default(),
-            stroke_size: Default::default(),
-            initial_stroke_size: Default::default(),
-            canvas: Document::new(),
-        }
-    }
-}
-
 impl PreslavSketcher {
-    /// Create a new sketcher with default values based on Preslav Rachev's suggestions
-    pub fn new_preslav(output_size: Vec2, expected_iterations: usize) -> Self {
-        let initial_stroke_size = output_size.x / 4.0;
-
-        Self {
-            stroke_reduction: initial_stroke_size / 70.0 / expected_iterations as f32,
-            stroke_jitter: 0.1 * output_size.x,
-            stroke_inversion_threshold: 0.05,
-            initial_alpha: 0.274,
-            alpha_increase: (1.0 - 0.274) / expected_iterations as f32,
-            min_edge_count: 3,
-            max_edge_count: 4,
-            stroke_size: initial_stroke_size,
-            initial_stroke_size,
-            canvas: Document::new()
-                .add(
-                    Rectangle::new()
-                        .set("fill", "#000")
-                        .set("width", output_size.x)
-                        .set("height", output_size.y),
-                )
-                .set("width", output_size.x)
-                .set("height", output_size.y),
+    pub fn new(settings: &PreslavSketcherSettings) -> Self {
+        Self{
+            stroke_reduction: settings.stroke_reduction,
+            stroke_jitter: settings.stroke_jitter,
+            stroke_inversion_threshold: settings.stroke_inversion_threshold,
+            initial_alpha: settings.initial_alpha,
+            alpha_increase: settings.alpha_increase,
+            min_edge_count: settings.min_edge_count,
+            max_edge_count: settings.max_edge_count,
+            stroke_size: settings.initial_stroke_size,
+            initial_stroke_size: settings.initial_stroke_size,
+            canvas: clean_canvas(settings.output_size)
         }
     }
 
@@ -107,7 +92,7 @@ impl PreslavSketcher {
         self.initial_alpha += self.alpha_increase;
     }
 
-    pub fn get_canvas(&self) -> &Document {
-        &self.canvas
+    pub fn render(&self) -> Document {
+        self.canvas.clone()
     }
 }

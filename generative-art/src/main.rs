@@ -17,7 +17,7 @@ mod preslav;
 
 use indicatif::ProgressBar;
 use indicatif::ProgressIterator;
-use preslav::PreslavSketcher;
+use preslav::{PreslavSketcher, PreslavSketcherSettings};
 use structopt::StructOpt;
 use svg::Document;
 
@@ -134,7 +134,7 @@ fn main() -> anyhow::Result<()> {
             alpha_increase,
             min_edge_count,
             max_edge_count,
-            iterations,
+            iterations: steps,
         } => {
             // Verify that inputs are valid.
             if min_edge_count > max_edge_count {
@@ -149,32 +149,28 @@ fn main() -> anyhow::Result<()> {
             let in_image = image::open(input)?;
             let in_image = in_image.into_rgb8();
 
-            let mut sketcher = PreslavSketcher::new_preslav(
-                Vec2::new(in_image.width() as f32, in_image.height() as f32),
-                iterations,
-            );
-            if let Some(initial_stroke_size) = initial_stroke_size {
-                sketcher.initial_stroke_size = initial_stroke_size;
-            }
-            if let Some(stroke_reduction) = stroke_reduction {
-                sketcher.stroke_reduction = stroke_reduction;
-            }
-            if let Some(stroke_jitter) = stroke_jitter {
-                sketcher.stroke_jitter = stroke_jitter;
-            }
-            sketcher.initial_alpha = initial_alpha;
-            if let Some(alpha_increase) = alpha_increase {
-                sketcher.alpha_increase = alpha_increase;
-            }
-            sketcher.stroke_inversion_threshold = stroke_inversion_threshold;
-            sketcher.min_edge_count = min_edge_count;
-            sketcher.max_edge_count = max_edge_count;
+            let dimensions = Vec2::new(in_image.width() as f32, in_image.height() as f32);
 
-            for _ in (0..iterations).progress() {
+            let settings = PreslavSketcherSettings{
+                output_size: dimensions,
+                expected_iterations: steps,
+                stroke_reduction: stroke_reduction.unwrap_or_else(|| dimensions.x / 4.0 / 70.0 / steps as f32),
+                stroke_jitter: stroke_jitter.unwrap_or_else(||0.1 * dimensions.x),
+                stroke_inversion_threshold,
+                initial_alpha,
+                alpha_increase: alpha_increase.unwrap_or_else(|| (1.0 - 0.274) / steps as f32),
+                min_edge_count,
+                max_edge_count,
+                initial_stroke_size: initial_stroke_size.unwrap_or_else(|| dimensions.x / 4.0),
+            };
+
+            let mut sketcher = PreslavSketcher::new(&settings);
+
+            for _ in (0..steps).progress() {
                 sketcher.step(&in_image);
             }
 
-            save(sketcher.get_canvas(), &output, in_image.width(), in_image.height())?;
+            save(&sketcher.render(), &output, in_image.width(), in_image.height())?;
         }
         Opt::Celestial {
             output,

@@ -7,7 +7,7 @@ use svg::node::element::{Path, Polyline, Rectangle};
 use svg::Node;
 use svg::{node::element::Circle, Document};
 
-use crate::helpers::{RgbExt, RngCoreExt};
+use crate::helpers::{RgbExt, RngCoreExt, clean_canvas};
 
 pub struct CelestialSketcherSettings {
     pub output_size: Vec2,
@@ -118,18 +118,6 @@ impl CelestialSketcher {
         }
     }
 
-    fn clean_canvas(size: Vec2) -> Document {
-        Document::new()
-            .add(
-                Rectangle::new()
-                    .set("fill", "#000")
-                    .set("width", size.x)
-                    .set("height", size.y),
-            )
-            .set("width", size.x)
-            .set("height", size.y)
-    }
-
     /// Renders the path of a given range of objects within a given a range of time.
     /// Allows to choose between rendering lines for path, or rendering dots at each time step.
     pub fn render(
@@ -138,7 +126,7 @@ impl CelestialSketcher {
         render_objects: Range<usize>,
         dots: bool,
     ) -> Document {
-        let mut canvas = Self::clean_canvas(self.canvas_size);
+        let mut canvas = clean_canvas(self.canvas_size);
 
         for index in render_objects {
             let object = &self.objects[index];

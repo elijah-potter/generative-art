@@ -3,6 +3,7 @@ use std::f32::consts::PI;
 use glam::Vec2;
 use image::{Rgb};
 use rand::{Rng, RngCore};
+use svg::{Document, node::element::Rectangle};
 
 /// Generates points for a regular polygon in svg format. Example: "215,200 100,100 400,100"
 pub fn regular_polygon_points(position: Vec2, radius: f32, sides: u32, theta: f32) -> String {
@@ -44,4 +45,16 @@ impl RgbExt for Rgb<u8> {
     fn as_hex(&self) -> String {
         format!("#{:02X}{:02X}{:02X}", self.0[0], self.0[1], self.0[2])
     }
+}
+
+pub fn clean_canvas(size: Vec2) -> Document {
+    Document::new()
+        .add(
+            Rectangle::new()
+                .set("fill", "#000")
+                .set("width", size.x)
+                .set("height", size.y),
+        )
+        .set("width", size.x)
+        .set("height", size.y)
 }
