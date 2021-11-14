@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use glam::Vec2;
-use image::{Rgb, Rgba};
+use image::{Rgb};
 use rand::{Rng, RngCore};
 
 /// Generates points for a regular polygon in svg format. Example: "215,200 100,100 400,100"

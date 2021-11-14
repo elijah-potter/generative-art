@@ -1,6 +1,6 @@
 use crate::helpers::{regular_polygon_points, RgbExt};
 use glam::Vec2;
-use image::{Rgb, RgbImage, Rgba, RgbaImage};
+use image::{Rgb, RgbImage};
 use rand::Rng;
 use svg::{
     node::element::{Polygon, Rectangle},

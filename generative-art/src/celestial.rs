@@ -1,7 +1,7 @@
 use std::{f32::consts::PI, ops::Range};
 
-use glam::{IVec2, Vec2};
-use image::{Rgb, Rgba, RgbaImage};
+use glam::{Vec2};
+use image::{Rgb};
 use rand::Rng;
 use svg::node::element::Rectangle;
 use svg::Node;
