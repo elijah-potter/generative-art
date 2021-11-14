@@ -30,7 +30,7 @@ enum Opt {
         input: PathBuf,
         #[structopt(short, long, parse(from_os_str), default_value = "generated.svg")]
         /// Name of file to save generated art to.
-        /// If not specified, the result will be writted to "generated.png".
+        /// If not specified, the result will be writted to "generated.svg".
         output: PathBuf,
         #[structopt(long)]
         /// Defines the initial size of shapes.
