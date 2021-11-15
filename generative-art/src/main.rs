@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::path::PathBuf;
 use std::time::Duration;
+use std::time::SystemTime;
 
 use celestial::CelestialSketcherSettings;
 use glam::Vec2;
@@ -165,7 +166,16 @@ fn main() -> anyhow::Result<()> {
                 initial_stroke_size: initial_stroke_size.unwrap_or_else(|| dimensions.x / 4.0),
             };
 
+            #[cfg(feature = "thread_rng")]
             let mut sketcher = PreslavSketcher::new(&settings);
+            #[cfg(feature = "small_rng")]
+            let mut sketcher = PreslavSketcher::new(
+                &settings,
+                SystemTime::now()
+                    .duration_since(SystemTime::UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs(),
+            );
 
             let step_iter = 0..steps;
             #[cfg(not(target_arch = "wasm32"))]
@@ -220,7 +230,7 @@ fn main() -> anyhow::Result<()> {
                 *pixel = Rgba::from_channels(0, 0, 0, 255);
             }
 
-            let mut sketcher = CelestialSketcher::new(CelestialSketcherSettings {
+            let settings = CelestialSketcherSettings {
                 output_size: Vec2::new(width as f32, height as f32),
                 object_count,
                 object_size: min_mass..max_mass,
@@ -230,7 +240,18 @@ fn main() -> anyhow::Result<()> {
                 max_radius_from_center,
                 increase_mass_with_distance,
                 expected_steps: steps,
-            });
+            };
+
+            #[cfg(feature = "thread_rng")]
+            let mut sketcher = CelestialSketcher::new(&settings);
+            #[cfg(feature = "small_rng")]
+            let mut sketcher = CelestialSketcher::new(
+                &settings,
+                SystemTime::now()
+                    .duration_since(SystemTime::UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs(),
+            );
 
             println!("Simulating...");
 
