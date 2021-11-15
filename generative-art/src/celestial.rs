@@ -167,7 +167,7 @@ impl CelestialSketcher {
                         .set("fill", "none")
                         .set("points", polyline)
                         .set("stroke", self.foreground.as_hex())
-                        .set("width", radius),
+                        .set("stroke-width", radius),
                 );
             }
         }
