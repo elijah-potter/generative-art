@@ -3,7 +3,7 @@ use std::{f32::consts::PI, ops::Range};
 use glam::Vec2;
 use image::Rgb;
 use rand::Rng;
-#[cfg(feature = "small_rng")]
+#[cfg(feature = "small-rng")]
 use rand::{rngs::SmallRng, SeedableRng};
 use svg::node::element::Polyline;
 use svg::Node;
@@ -45,11 +45,11 @@ impl CelestialSketcher {
     /// If the render count is greater than the object count, it panics.
     pub fn new(
         settings: &CelestialSketcherSettings,
-        #[cfg(feature = "small_rng")] seed: u64,
+        #[cfg(feature = "small-rng")] seed: u64,
     ) -> Self {
-        #[cfg(feature = "thread_rng")]
+        #[cfg(feature = "thread-rng")]
         let mut rng = rand::thread_rng();
-        #[cfg(feature = "small_rng")]
+        #[cfg(feature = "small-rng")]
         let mut rng = SmallRng::seed_from_u64(seed);
 
         let mut objects = Vec::with_capacity(settings.object_count);

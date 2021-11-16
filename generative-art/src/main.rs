@@ -166,9 +166,9 @@ fn main() -> anyhow::Result<()> {
                 initial_stroke_size: initial_stroke_size.unwrap_or_else(|| dimensions.x / 4.0),
             };
 
-            #[cfg(feature = "thread_rng")]
+            #[cfg(feature = "thread-rng")]
             let mut sketcher = PreslavSketcher::new(&settings);
-            #[cfg(feature = "small_rng")]
+            #[cfg(feature = "small-rng")]
             let mut sketcher = PreslavSketcher::new(
                 &settings,
                 SystemTime::now()
@@ -242,9 +242,9 @@ fn main() -> anyhow::Result<()> {
                 expected_steps: steps,
             };
 
-            #[cfg(feature = "thread_rng")]
+            #[cfg(feature = "thread-rng")]
             let mut sketcher = CelestialSketcher::new(&settings);
-            #[cfg(feature = "small_rng")]
+            #[cfg(feature = "small-rng")]
             let mut sketcher = CelestialSketcher::new(
                 &settings,
                 SystemTime::now()

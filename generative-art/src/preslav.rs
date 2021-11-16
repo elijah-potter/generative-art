@@ -2,7 +2,7 @@ use crate::helpers::{clean_canvas, regular_polygon_points, RgbExt};
 use glam::Vec2;
 use image::{Rgb, RgbImage};
 use rand::Rng;
-#[cfg(feature = "small_rng")]
+#[cfg(feature = "small-rng")]
 use rand::{rngs::SmallRng, SeedableRng};
 use svg::{node::element::Polygon, Document, Node};
 
@@ -31,14 +31,14 @@ pub struct PreslavSketcher {
     stroke_size: f32,
     initial_stroke_size: f32,
     canvas: Document,
-    #[cfg(feature = "small_rng")]
+    #[cfg(feature = "small-rng")]
     rng: SmallRng,
 }
 
 impl PreslavSketcher {
     pub fn new(
         settings: &PreslavSketcherSettings,
-        #[cfg(feature = "small_rng")] seed: u64,
+        #[cfg(feature = "small-rng")] seed: u64,
     ) -> Self {
         Self {
             stroke_reduction: settings.stroke_reduction,
@@ -51,17 +51,17 @@ impl PreslavSketcher {
             stroke_size: settings.initial_stroke_size,
             initial_stroke_size: settings.initial_stroke_size,
             canvas: clean_canvas(settings.output_size),
-            #[cfg(feature = "small_rng")]
+            #[cfg(feature = "small-rng")]
             rng: SmallRng::seed_from_u64(seed),
         }
     }
 
     /// Runs the next step of the algorithm, thereby painting a new polygon.
-    /// If using the `small_rng` feature, seed should be a random value each time this function is called.
+    /// If using the `small-rng` feature, seed should be a random value each time this function is called.
     pub fn step(&mut self, input: &RgbImage) {
-        #[cfg(feature = "thread_rng")]
+        #[cfg(feature = "thread-rng")]
         let mut rng = rand::thread_rng();
-        #[cfg(feature = "small_rng")]
+        #[cfg(feature = "small-rng")]
         let mut rng = &mut self.rng;
 
         let x = rng.gen_range(0.0..(input.width() as f32));

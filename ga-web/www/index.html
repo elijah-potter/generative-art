@@ -1,12 +1,38 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Hello wasm-pack!</title>
-  </head>
-  <body>
-    <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
-    <script src="./bootstrap.js"></script>
-    <button id="button">Click</button>
-  </body>
+
+<head>
+  <meta charset="utf-8">
+  <title>Hello wasm-pack!</title>
+</head>
+
+<body>
+  <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
+  <script src="./bootstrap.js"></script>
+  <img id="image" width="400"></img>
+  <p>Width of image</p>
+  <input id="width" type="number" value="1000">
+  <p>Height of image</p>
+  <input id="height" type="number" value="1000">
+  <p>The number of bodies the simulation.</p>
+  <input id="object_count" type="number" value="3">
+  <p>Minimum Mass of An Object</p>
+  <input id="min_object_size" type="number" value="1.0">
+  <p>Maximum Mass of An Object</p>
+  <input id="max_object_size" type="number" value="100.0">
+  <p>Minimum Initial Velocity of An Object</p>
+  <input id="min_object_velocity" type="number" value="2.0">
+  <p>Maximum Initial Velocity of An Object</p>
+  <input id="max_object_velocity" type="number" value="1000.0">
+  <p>Universal Gravitational Constant</p>
+  <input id="g" type="number" value="1.0">
+  <p>Render as dots (WARNING: This method is much slower and may make your page unresponsive for a time. It does
+    sometimes look cool though.)</p>
+  <input id="dots" type="checkbox">
+  <p>The seed used for randomness.</p>
+  <input id="seed" type="number" value="0">
+  <button id="randomize">Randomize Seed</button>
+  <button id="button">Run</button>
+</body>
+
 </html>

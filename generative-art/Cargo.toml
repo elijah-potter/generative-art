@@ -7,9 +7,9 @@ edition = "2021"
 [lib]
 
 [features]
-default = ["thread_rng"]
-small_rng = ["rand/small_rng"]
-thread_rng = ["rand/std", "rand/std_rng"]
+default = ["thread-rng"]
+small-rng = ["rand/small_rng"]
+thread-rng = ["rand/std", "rand/std_rng"]
 
 [dependencies]
 anyhow = "1.0.45"
