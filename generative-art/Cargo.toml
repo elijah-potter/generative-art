@@ -24,6 +24,5 @@ indicatif = "0.16.2"
 rand = { version = "0.8.4", default-features = false }
 resvg = "0.19.0"
 structopt = "0.3.25"
-svg = "0.10.0"
 tiny-skia = "0.6.1"
 usvg = "0.19.0"

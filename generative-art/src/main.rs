@@ -1,26 +1,33 @@
+use std::fs::write;
+use std::fs::File;
+use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::time::Duration;
 use std::time::SystemTime;
 
-use celestial::CelestialSketcherSettings;
 use glam::Vec2;
 use image::Pixel;
+use sketchers::CelestialSketcher;
+use sketchers::CelestialSketcherSettings;
+use sketchers::Color;
+use sketchers::PreslavSketcher;
+use sketchers::PreslavSketcherSettings;
+use sketchers::VectorCanvas;
+use sketchers::VectorSketcher;
 
-use celestial::CelestialSketcher;
 use image::Rgb;
 use image::Rgba;
 use image::RgbaImage;
 
-mod celestial;
 mod helpers;
-mod preslav;
+mod sketchers;
 
 use indicatif::ProgressBar;
 use indicatif::ProgressIterator;
-use preslav::{PreslavSketcher, PreslavSketcherSettings};
+use rand::distributions::Uniform;
+use rand::prelude::Distribution;
 use structopt::StructOpt;
-use svg::Document;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Art")]
@@ -39,7 +46,7 @@ enum Opt {
         initial_stroke_size: Option<f32>,
         #[structopt(long)]
         /// Defines how much smaller each shape gets per iteration.
-        /// If not specified, it will be decided based on the number of expected iterations.
+        /// If not specified, it will be decided based on the number of expected steps.
         stroke_reduction: Option<f32>,
         #[structopt(long)]
         /// This specifies how large the random offset each shape should be from it's sample location.
@@ -54,19 +61,19 @@ enum Opt {
         initial_alpha: f32,
         #[structopt(long)]
         /// How much the alpha of each shape should increase by each iteration.
-        /// By default, this is automatically determined by the number of expected iterations.
+        /// By default, this is automatically determined by the number of expected steps.
         alpha_increase: Option<f32>,
         #[structopt(long, default_value = "3")]
         /// The minimum number of sides a shape can have.
         /// This must be more than 3.
-        min_edge_count: u32,
+        min_edge_count: usize,
         #[structopt(long, default_value = "4")]
         /// The maximum number of sides a shape can have.
         /// This must be greater or equal to min-edge-count.
-        max_edge_count: u32,
+        max_edge_count: usize,
         #[structopt(short, long, default_value = "5000")]
-        /// The number of iterations to run.
-        iterations: usize,
+        /// The number of steps to run.
+        steps: usize,
     },
     Celestial {
         #[structopt(short, long, default_value = "celestial.svg")]
@@ -135,7 +142,7 @@ fn main() -> anyhow::Result<()> {
             alpha_increase,
             min_edge_count,
             max_edge_count,
-            iterations: steps,
+            steps: steps,
         } => {
             // Verify that inputs are valid.
             if min_edge_count > max_edge_count {
@@ -154,20 +161,21 @@ fn main() -> anyhow::Result<()> {
 
             let settings = PreslavSketcherSettings {
                 output_size: dimensions,
-                expected_iterations: steps,
-                stroke_reduction: stroke_reduction
-                    .unwrap_or_else(|| dimensions.x / 4.0 / 70.0 / steps as f32),
                 stroke_jitter: stroke_jitter.unwrap_or_else(|| 0.1 * dimensions.x),
                 stroke_inversion_threshold,
                 initial_alpha,
                 alpha_increase: alpha_increase.unwrap_or_else(|| (1.0 - 0.274) / steps as f32),
-                min_edge_count,
-                max_edge_count,
+                edge_count: Uniform::new(min_edge_count, max_edge_count),
                 initial_stroke_size: initial_stroke_size.unwrap_or_else(|| dimensions.x / 4.0),
+                stroke_reduction: stroke_reduction
+                    .unwrap_or_else(|| dimensions.x / 4.0 / 70.0 / steps as f32),
+                shapes: steps,
+                input_image: in_image,
             };
 
             #[cfg(feature = "thread-rng")]
             let mut sketcher = PreslavSketcher::new(&settings);
+
             #[cfg(feature = "small-rng")]
             let mut sketcher = PreslavSketcher::new(
                 &settings,
@@ -177,19 +185,19 @@ fn main() -> anyhow::Result<()> {
                     .as_secs(),
             );
 
-            let step_iter = 0..steps;
-            #[cfg(not(target_arch = "wasm32"))]
-            let step_iter = step_iter.progress();
-
-            for _i in step_iter {
-                sketcher.step(&in_image);
-            }
+            #[cfg(not(feature = "wasm"))]
+            let bar = ProgressBar::new(100);
 
             save(
-                &sketcher.render(),
-                &output,
-                in_image.width(),
-                in_image.height(),
+                sketcher.run(|progress| {
+                    #[cfg(not(feature = "wasm"))]
+                    bar.set_length((progress * 100.0) as u64);
+                }),
+                output.as_path(),
+                Vec2::new(
+                    settings.input_image.width() as f32,
+                    settings.input_image.height() as f32,
+                ),
             )?;
         }
         Opt::Celestial {
@@ -233,71 +241,53 @@ fn main() -> anyhow::Result<()> {
             let settings = CelestialSketcherSettings {
                 output_size: Vec2::new(width as f32, height as f32),
                 object_count,
-                object_size: min_mass..max_mass,
-                object_velocity: minimum_initial_velocity..maximum_initial_velocity,
+                object_size: Uniform::new(min_mass, max_mass),
+                object_velocity: Uniform::new(minimum_initial_velocity, maximum_initial_velocity),
                 g,
-                foreground: Rgb::from_channels(255, 255, 255, 255),
-                max_radius_from_center,
-                increase_mass_with_distance,
-                expected_steps: steps,
+                render_count: render_count.unwrap_or(object_count),
+                object_position: Uniform::new(0.0, width as f32),
+                foreground: Color::WHITE,
+                steps,
+                step_length: step_size,
+                render_dots: dots,
             };
 
-            #[cfg(feature = "thread-rng")]
             let mut sketcher = CelestialSketcher::new(&settings);
-            #[cfg(feature = "small-rng")]
-            let mut sketcher = CelestialSketcher::new(
-                &settings,
-                SystemTime::now()
-                    .duration_since(SystemTime::UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs(),
-            );
 
-            println!("Simulating...");
+            #[cfg(not(feature = "wasm"))]
+            let bar = ProgressBar::new(100);
 
-            let step_iter = 0..steps;
-            #[cfg(not(target_arch = "wasm32"))]
-            let step_iter = step_iter.progress();
+            sketcher.run(|progress| {
+                #[cfg(not(feature = "wasm"))]
+                bar.set_length((progress * 100.0) as u64);
+            });
 
-            for _i in step_iter {
-                sketcher.step(step_size);
-            }
-
-            println!("Rendering...");
-
-            #[cfg(not(target_arch = "wasm32"))]
-            {
-                std::thread::spawn(|| {
-                    let spinner = ProgressBar::new_spinner();
-
-                    loop {
-                        spinner.tick();
-                        std::thread::sleep(Duration::from_millis(100));
-                    }
-                });
-            }
-
-            let sketch = sketcher.render(0..steps, 0..render_count.unwrap_or(object_count), dots);
-            save(&sketch, &output, width, height)?;
+            save(
+                sketcher.run(|progress| {
+                    #[cfg(not(feature = "wasm"))]
+                    bar.set_length((progress * 100.0) as u64);
+                }),
+                output.as_path(),
+                settings.output_size
+            )?;
         }
     }
 
     Ok(())
 }
 
-fn save(canvas: &Document, path: &Path, width: u32, height: u32) -> anyhow::Result<()> {
+fn save(canvas: &VectorCanvas, path: &Path, size: Vec2) -> anyhow::Result<()> {
     if let Some(extension) = path.extension() {
         match extension.to_str().unwrap() {
             "svg" => {
-                svg::save(path, canvas)?;
+                let svg = canvas.render_svg(size, Some(Color::new(0.0, 0.0, 0.0, 1.0)));
+
+                let mut file = File::create(path)?;
+                file.write_all(svg.as_bytes())?;
             }
             "bmp" | "jpg" | "jpeg" | "png" | "tiff" => {
-                let options = usvg::Options::default();
-                let tree = usvg::Tree::from_str(&canvas.to_string(), &options.to_ref()).unwrap();
-                let mut pixmap = tiny_skia::Pixmap::new(width, height).unwrap();
-                resvg::render(&tree, usvg::FitTo::Original, pixmap.as_mut()).unwrap();
+                let image = canvas.render_rgb(size, 1.0, Some(Color::BLACK));
 
-                let image = RgbaImage::from_raw(width, height, pixmap.data().to_owned()).unwrap();
                 image.save(path)?;
             }
             _ => println!("Couldn't save with that extension."),
