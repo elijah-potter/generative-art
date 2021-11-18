@@ -1,13 +1,10 @@
-use std::{f32::consts::PI, ops::Range};
+use std::f32::consts::PI;
 
 use glam::Vec2;
-use image::Rgb;
+
 use rand::prelude::Distribution;
-use rand::Rng;
 #[cfg(feature = "small-rng")]
 use rand::{rngs::SmallRng, SeedableRng};
-
-use crate::helpers::RngCoreExt;
 
 use super::canvas::{Circle, Color, Line};
 use super::{VectorCanvas, VectorSketcher};
@@ -70,10 +67,10 @@ impl CelestialSketcher {
         let mut rng = SmallRng::seed_from_u64(seed);
 
         let mut objects = Vec::with_capacity(settings.object_count);
-        let mut total_energy = Vec2::ZERO;
+        let _total_energy = Vec2::ZERO;
 
         while objects.len() < settings.object_count {
-            let mut radius = settings.output_size.y;
+            let _radius = settings.output_size.y;
 
             let position = Vec2::new(
                 settings.object_position.sample(&mut rng),
@@ -137,12 +134,14 @@ impl CelestialSketcher {
             let radius = (object.mass / PI).sqrt();
 
             if self.render_dots {
-                for position in &object.path {
-                    self.canvas.draw(Box::new(Circle {
-                        center: object.position,
-                        radius,
-                        color: self.foreground,
-                    }));
+                for _position in &object.path {
+                    if self.inside_view(object.position, radius) {
+                        self.canvas.draw(Box::new(Circle {
+                            center: object.position,
+                            radius,
+                            color: self.foreground,
+                        }));
+                    }
                 }
             } else {
                 self.canvas.draw(Box::new(Line {

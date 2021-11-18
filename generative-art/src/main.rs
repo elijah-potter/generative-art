@@ -1,10 +1,10 @@
-use std::fs::write;
+
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
-use std::time::Duration;
-use std::time::SystemTime;
+
+
 
 use glam::Vec2;
 use image::Pixel;
@@ -16,7 +16,7 @@ use sketchers::PreslavSketcherSettings;
 use sketchers::VectorCanvas;
 use sketchers::VectorSketcher;
 
-use image::Rgb;
+
 use image::Rgba;
 use image::RgbaImage;
 
@@ -24,9 +24,8 @@ mod helpers;
 mod sketchers;
 
 use indicatif::ProgressBar;
-use indicatif::ProgressIterator;
+
 use rand::distributions::Uniform;
-use rand::prelude::Distribution;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
@@ -142,7 +141,7 @@ fn main() -> anyhow::Result<()> {
             alpha_increase,
             min_edge_count,
             max_edge_count,
-            steps: steps,
+            steps,
         } => {
             // Verify that inputs are valid.
             if min_edge_count > max_edge_count {
@@ -210,8 +209,8 @@ fn main() -> anyhow::Result<()> {
             minimum_initial_velocity,
             maximum_initial_velocity,
             g,
-            maximum_radius_from_center: max_radius_from_center,
-            increase_mass_with_distance,
+            maximum_radius_from_center: _max_radius_from_center,
+            increase_mass_with_distance: _,
             dots,
             render_count,
             steps,

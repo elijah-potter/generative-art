@@ -1,7 +1,7 @@
-use std::ops::Range;
+
 
 use glam::Vec2;
-use image::{Rgb, RgbImage};
+use image::{RgbImage};
 use rand::{prelude::Distribution, Rng};
 #[cfg(feature = "small-rng")]
 use rand::{rngs::SmallRng, SeedableRng};
@@ -45,7 +45,6 @@ pub struct PreslavSketcher<E>
 where
     E: Distribution<usize> + Clone,
 {
-    output_size: Vec2,
     stroke_jitter: f32,
     stroke_inversion_threshold: f32,
     alpha: f32,
@@ -70,7 +69,6 @@ where
         #[cfg(feature = "small-rng")] seed: u64,
     ) -> Self {
         Self {
-            output_size: settings.output_size,
             stroke_jitter: settings.stroke_jitter,
             stroke_inversion_threshold: settings.stroke_inversion_threshold,
             alpha: settings.initial_alpha,
@@ -121,7 +119,7 @@ where
             sides: edge_count,
             rotation: rng.gen(),
             radius: self.stroke_size,
-            color: color.into(),
+            color,
             outline_color: edge_color,
         }));
 

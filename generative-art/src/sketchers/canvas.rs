@@ -3,7 +3,7 @@ use std::{
     fmt::{self, Write},
 };
 
-use glam::{IVec2, Vec2};
+use glam::{Vec2};
 use image::{Rgb, Rgba, RgbaImage};
 
 #[derive(Default)]
@@ -22,7 +22,7 @@ impl VectorCanvas {
         let mut output = format!("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{}\" height=\"{}\">", size.x, size.y);
 
         if let Some(background) = background {
-            write!(
+            let _ = write!(
                 output,
                 "<rect fill=\"{}\" width=\"{}\" height=\"{}\"/>",
                 background.as_hex(false),
@@ -32,10 +32,10 @@ impl VectorCanvas {
         }
 
         for element in &self.elements {
-            element.write_svg(&mut output);
+            let _ = element.write_svg(&mut output);
         }
 
-        write!(output, "</svg>");
+        let _ = write!(output, "</svg>");
 
         output
     }
