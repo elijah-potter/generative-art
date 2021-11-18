@@ -3,7 +3,7 @@ use std::{
     fmt::{self, Write},
 };
 
-use glam::{Vec2};
+use glam::Vec2;
 use image::{Rgb, Rgba, RgbaImage};
 
 #[derive(Default)]
@@ -19,7 +19,10 @@ impl VectorCanvas {
 
     /// Renders the canvas to SVG.
     pub fn render_svg(&self, size: Vec2, background: Option<Color>) -> String {
-        let mut output = format!("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{}\" height=\"{}\">", size.x, size.y);
+        let mut output = format!(
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{}\" height=\"{}\">",
+            size.x, size.y
+        );
 
         if let Some(background) = background {
             let _ = write!(
@@ -82,12 +85,17 @@ impl Color {
         if include_alpha {
             format!(
                 "#{:02X}{:02X}{:02X}{:02X}",
-                (self.r * 255.0 ) as u8, (self.g * 255.0) as u8, (self.b * 255.0) as u8, (self.a * 255.0) as u8
+                (self.r * 255.0) as u8,
+                (self.g * 255.0) as u8,
+                (self.b * 255.0) as u8,
+                (self.a * 255.0) as u8
             )
         } else {
             format!(
                 "#{:02X}{:02X}{:02X}",
-                (self.r * 255.0 ) as u8, (self.g * 255.0) as u8, (self.b * 255.0) as u8
+                (self.r * 255.0) as u8,
+                (self.g * 255.0) as u8,
+                (self.b * 255.0) as u8
             )
         }
     }

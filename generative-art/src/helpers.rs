@@ -1,5 +1,3 @@
-
-
 use rand::{Rng, RngCore};
 
 pub trait RngCoreExt {

@@ -1,10 +1,7 @@
-
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
-
-
 
 use glam::Vec2;
 use image::Pixel;
@@ -15,7 +12,6 @@ use sketchers::PreslavSketcher;
 use sketchers::PreslavSketcherSettings;
 use sketchers::VectorCanvas;
 use sketchers::VectorSketcher;
-
 
 use image::Rgba;
 use image::RgbaImage;
@@ -267,7 +263,7 @@ fn main() -> anyhow::Result<()> {
                     bar.set_length((progress * 100.0) as u64);
                 }),
                 output.as_path(),
-                settings.output_size
+                settings.output_size,
             )?;
         }
     }

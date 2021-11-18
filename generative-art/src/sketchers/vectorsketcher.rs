@@ -1,7 +1,3 @@
-
-
-
-
 use super::VectorCanvas;
 
 pub trait VectorSketcher {

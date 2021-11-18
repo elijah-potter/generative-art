@@ -1,7 +1,5 @@
-
-
 use glam::Vec2;
-use image::{RgbImage};
+use image::RgbImage;
 use rand::{prelude::Distribution, Rng};
 #[cfg(feature = "small-rng")]
 use rand::{rngs::SmallRng, SeedableRng};
@@ -104,15 +102,16 @@ where
         let mut color: Color = self.input_image.get_pixel(x as u32, y as u32).into();
         color.a = self.alpha;
 
-        let edge_color = if self.stroke_size <= self.stroke_inversion_threshold * self.initial_stroke_size {
-            if color.r + color.g + color.b / 3.0 < 0.5 {
-                Some(Color::new(1.0, 1.0, 1.0, self.alpha * 2.0))
+        let edge_color =
+            if self.stroke_size <= self.stroke_inversion_threshold * self.initial_stroke_size {
+                if color.r + color.g + color.b / 3.0 < 0.5 {
+                    Some(Color::new(1.0, 1.0, 1.0, self.alpha * 2.0))
+                } else {
+                    Some(Color::new(0.0, 0.0, 0.0, self.alpha * 2.0))
+                }
             } else {
-                Some(Color::new(0.0, 0.0, 0.0, self.alpha * 2.0))
-            }
-        } else {
-            None
-        };
+                None
+            };
 
         self.canvas.draw(Box::new(RegularPolygon {
             center: d,
