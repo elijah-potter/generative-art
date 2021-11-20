@@ -5,8 +5,7 @@ use std::path::PathBuf;
 
 use glam::Vec2;
 use image::Pixel;
-use sketchers::CelestialSketcher;
-use sketchers::CelestialSketcherSettings;
+use sketchers::{CelestialSketcher, CelestialSketcherSettings};
 use sketchers::Color;
 use sketchers::PreslavSketcher;
 use sketchers::PreslavSketcherSettings;

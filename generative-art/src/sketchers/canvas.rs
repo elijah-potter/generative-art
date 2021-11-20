@@ -162,7 +162,7 @@ impl<W: Write> VectorElement<W> for Line {
 
         write!(
             w,
-            "\" stroke=\"{}\" stroke-width=\"{}\" ",
+            "\" stroke=\"{}\" stroke-width=\"{}\" fill=\"none\" stroke-linecap=\"round\" ",
             self.color.as_hex(false),
             self.radius * 2.0
         )?;
