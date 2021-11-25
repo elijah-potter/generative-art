@@ -9,7 +9,7 @@ pub mod vectorcanvas;
 pub use celestial::{CelestialSketcher, CelestialSketcherSettings};
 pub use color::Color;
 pub use fragment::{FragmentSketcher, FragmentSketcherSettings};
-use indicatif::ProgressBar;
+
 pub use preslav::{PreslavSketcher, PreslavSketcherSettings};
 pub use rasterconverter::{RasterConverterSketcher, RasterConverterSketcherSettings};
 

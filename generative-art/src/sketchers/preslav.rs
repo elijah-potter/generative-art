@@ -1,10 +1,12 @@
 use glam::Vec2;
-use image::RgbImage;
+
 use rand::{prelude::Distribution, Rng};
 #[cfg(feature = "small-rng")]
 use rand::{rngs::SmallRng, SeedableRng};
 
-use super::{Color, VectorCanvas, VectorSketcher, rastercanvas::RasterCanvas, vectorcanvas::RegularPolygon};
+use super::{
+    rastercanvas::RasterCanvas, vectorcanvas::RegularPolygon, Color, VectorCanvas, VectorSketcher,
+};
 
 #[derive(Clone)]
 pub struct PreslavSketcherSettings<E>
@@ -128,7 +130,7 @@ where
 impl<E, F> VectorSketcher<F> for PreslavSketcher<E>
 where
     E: Distribution<usize> + Clone,
-    F: Fn(f32)
+    F: Fn(f32),
 {
     fn run(&mut self, before_iter: F) -> VectorCanvas {
         for i in 0..self.shapes {

@@ -1,6 +1,10 @@
 use glam::Vec2;
 
-use super::{VectorSketcher, rastercanvas::RasterCanvas, vectorcanvas::{Polygon, RegularPolygon, VectorCanvas}};
+use super::{
+    rastercanvas::RasterCanvas,
+    vectorcanvas::{RegularPolygon, VectorCanvas},
+    VectorSketcher,
+};
 
 #[derive(Clone)]
 pub struct RasterConverterSketcherSettings {
@@ -11,16 +15,18 @@ pub struct RasterConverterSketcher {
     image: RasterCanvas,
 }
 
-impl RasterConverterSketcher{
-    pub fn new(settings: RasterConverterSketcherSettings) -> Self{
-        Self{
-            image: settings.image.clone()
+impl RasterConverterSketcher {
+    pub fn new(settings: RasterConverterSketcherSettings) -> Self {
+        Self {
+            image: settings.image.clone(),
         }
     }
 }
 
 impl<F> VectorSketcher<F> for RasterConverterSketcher
-    where F: Fn(f32){
+where
+    F: Fn(f32),
+{
     fn run(&mut self, before_iter: F) -> VectorCanvas {
         let mut output = VectorCanvas::default();
 
@@ -33,7 +39,7 @@ impl<F> VectorSketcher<F> for RasterConverterSketcher
             let y = (i / width) as f32;
             let x = (i % width) as f32;
 
-            output.draw(Box::new(RegularPolygon{
+            output.draw(Box::new(RegularPolygon {
                 center: Vec2::new(x - 0.5, y - 0.5),
                 sides: 4,
                 rotation: 0.0,

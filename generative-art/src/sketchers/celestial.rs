@@ -8,7 +8,7 @@ use rand::{rngs::SmallRng, SeedableRng};
 
 use super::{
     vectorcanvas::{Circle, Line},
-    Color, VectorCanvas, VectorSketcher
+    Color, VectorCanvas, VectorSketcher,
 };
 
 #[derive(Clone)]

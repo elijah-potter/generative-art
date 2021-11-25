@@ -1,3 +1,1 @@
-pub struct PipeLine{
-        
-}
+pub struct PipeLine {}

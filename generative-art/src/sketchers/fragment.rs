@@ -1,5 +1,3 @@
-use glam::{IVec2, UVec2};
-
 use super::{rastercanvas::RasterCanvas, Color, RasterSketcher};
 
 #[derive(Clone)]
@@ -39,7 +37,7 @@ where
 impl<F, P> RasterSketcher<P> for FragmentSketcher<F>
 where
     F: Fn(usize, usize, &mut Color) + Clone,
-    P: Fn(f32)
+    P: Fn(f32),
 {
     fn run(&mut self, before_iter: P) -> RasterCanvas {
         let total_pixels = (self.canvas.width() * self.canvas.height()) as f32;

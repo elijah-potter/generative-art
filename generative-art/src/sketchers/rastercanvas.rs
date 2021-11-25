@@ -1,6 +1,6 @@
 use image::RgbaImage;
 
-use super::{Color, VectorCanvas};
+use super::Color;
 
 #[derive(Clone)]
 pub struct RasterCanvas {
@@ -36,14 +36,14 @@ impl RasterCanvas {
         Self {
             width: image.width() as usize,
             height: image.height() as usize,
-            image: data
+            image: data,
         }
     }
 
-    pub fn as_rgba(&self) -> RgbaImage{
+    pub fn as_rgba(&self) -> RgbaImage {
         let mut data = vec![0u8; self.width * self.height * 4];
 
-        for (i, pixel) in self.image.iter().enumerate(){
+        for (i, pixel) in self.image.iter().enumerate() {
             let i = i * 4;
 
             data[i] = (pixel.r() * 255.0) as u8;
@@ -59,28 +59,28 @@ impl RasterCanvas {
         self.image[y * self.width + x] = color;
     }
 
-    pub fn get_pixel(&mut self, x: usize, y: usize) -> Color{
+    pub fn get_pixel(&mut self, x: usize, y: usize) -> Color {
         self.image[y * self.width + x]
     }
 
-    pub fn get_raw(&self) -> &Vec<Color>{
+    pub fn get_raw(&self) -> &Vec<Color> {
         &self.image
     }
 
-    pub fn get_raw_mut(&mut self) -> &mut Vec<Color>{
+    pub fn get_raw_mut(&mut self) -> &mut Vec<Color> {
         &mut self.image
     }
 
-    pub const fn width(&self) -> usize{
+    pub const fn width(&self) -> usize {
         self.width
     }
-    
-    pub const fn height(&self) -> usize{
+
+    pub const fn height(&self) -> usize {
         self.height
     }
 }
 
-impl From<RgbaImage> for RasterCanvas{
+impl From<RgbaImage> for RasterCanvas {
     fn from(image: RgbaImage) -> Self {
         RasterCanvas::from_rgba(&image)
     }

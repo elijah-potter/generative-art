@@ -5,20 +5,17 @@ use std::path::PathBuf;
 
 use glam::Vec2;
 use image::Pixel;
-use sketchers::{CelestialSketcher, CelestialSketcherSettings};
-use sketchers::Color;
-use sketchers::PreslavSketcher;
-use sketchers::PreslavSketcherSettings;
-use sketchers::vectorcanvas::VectorCanvas;
-use sketchers::VectorSketcher;
-use sketchers::rastercanvas::RasterCanvas;
+use sketchers::{
+    rastercanvas::RasterCanvas, vectorcanvas::VectorCanvas, CelestialSketcher,
+    CelestialSketcherSettings, Color, PreslavSketcher, PreslavSketcherSettings, VectorSketcher,
+};
 
 use image::Rgba;
 use image::RgbaImage;
 
 mod helpers;
-mod sketchers;
 mod pipeline;
+mod sketchers;
 
 use indicatif::ProgressBar;
 
@@ -192,11 +189,7 @@ fn main() -> anyhow::Result<()> {
                 bar.set_length((progress * 100.0) as u64);
             });
 
-            save(
-                &final_canvas,
-                output.as_path(),
-                output_size,
-            )?;
+            save(&final_canvas, output.as_path(), output_size)?;
         }
         Opt::Celestial {
             output,

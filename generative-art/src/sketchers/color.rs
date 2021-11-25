@@ -1,4 +1,4 @@
-use std::{ops::{Add, Div, Mul, Rem, Sub}, process::Output};
+use std::ops::{Add, Div, Mul, Rem, Sub};
 
 use glam::Vec4;
 use image::{Rgb, Rgba};
@@ -11,18 +11,17 @@ pub struct Color {
 }
 
 impl Color {
-    pub fn white() -> Self{
+    pub fn white() -> Self {
         Color::new(1.0, 1.0, 1.0, 1.0)
     }
 
-    pub fn black() -> Self{
+    pub fn black() -> Self {
         Color::new(0.0, 0.0, 0.0, 1.0)
     }
 
-    pub fn transparent() -> Self{
+    pub fn transparent() -> Self {
         Color::new(0.0, 0.0, 0.0, 0.0)
     }
-    
 
     pub fn new(r: f32, g: f32, b: f32, a: f32) -> Self {
         Self {
@@ -163,15 +162,14 @@ impl Div<f32> for Color {
     }
 }
 
-impl Rem<f32> for Color{
+impl Rem<f32> for Color {
     type Output = Color;
 
     fn rem(self, rhs: f32) -> Self::Output {
-        Color{
-            inner: self.inner % rhs
+        Color {
+            inner: self.inner % rhs,
         }
     }
-    
 }
 
 impl Add<Color> for Color {
@@ -214,13 +212,12 @@ impl Div<Color> for Color {
     }
 }
 
-impl Rem<Color> for Color{
+impl Rem<Color> for Color {
     type Output = Color;
 
     fn rem(self, rhs: Color) -> Self::Output {
-        Color{
-            inner: self.inner % rhs.inner
+        Color {
+            inner: self.inner % rhs.inner,
         }
     }
-    
 }

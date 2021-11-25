@@ -4,7 +4,7 @@ use std::{
 };
 
 use glam::Vec2;
-use image::{RgbaImage};
+use image::RgbaImage;
 
 use super::Color;
 
