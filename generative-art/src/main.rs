@@ -9,14 +9,16 @@ use sketchers::{CelestialSketcher, CelestialSketcherSettings};
 use sketchers::Color;
 use sketchers::PreslavSketcher;
 use sketchers::PreslavSketcherSettings;
-use sketchers::VectorCanvas;
+use sketchers::vectorcanvas::VectorCanvas;
 use sketchers::VectorSketcher;
+use sketchers::rastercanvas::RasterCanvas;
 
 use image::Rgba;
 use image::RgbaImage;
 
 mod helpers;
 mod sketchers;
+mod pipeline;
 
 use indicatif::ProgressBar;
 
@@ -149,7 +151,10 @@ fn main() -> anyhow::Result<()> {
             }
 
             let in_image = image::open(input)?;
-            let in_image = in_image.into_rgb8();
+            let in_image = in_image.into_rgba8();
+            let in_image = RasterCanvas::from_rgba(&in_image);
+
+            let output_size = Vec2::new(in_image.width() as f32, in_image.height() as f32);
 
             let dimensions = Vec2::new(in_image.width() as f32, in_image.height() as f32);
 
@@ -168,7 +173,7 @@ fn main() -> anyhow::Result<()> {
             };
 
             #[cfg(feature = "thread-rng")]
-            let mut sketcher = PreslavSketcher::new(&settings);
+            let mut sketcher = PreslavSketcher::new(settings);
 
             #[cfg(feature = "small-rng")]
             let mut sketcher = PreslavSketcher::new(
@@ -182,16 +187,15 @@ fn main() -> anyhow::Result<()> {
             #[cfg(not(feature = "wasm"))]
             let bar = ProgressBar::new(100);
 
+            let final_canvas = sketcher.run(|progress| {
+                #[cfg(not(feature = "wasm"))]
+                bar.set_length((progress * 100.0) as u64);
+            });
+
             save(
-                sketcher.run(|progress| {
-                    #[cfg(not(feature = "wasm"))]
-                    bar.set_length((progress * 100.0) as u64);
-                }),
+                &final_canvas,
                 output.as_path(),
-                Vec2::new(
-                    settings.input_image.width() as f32,
-                    settings.input_image.height() as f32,
-                ),
+                output_size,
             )?;
         }
         Opt::Celestial {
@@ -232,21 +236,23 @@ fn main() -> anyhow::Result<()> {
                 *pixel = Rgba::from_channels(0, 0, 0, 255);
             }
 
+            let output_size = Vec2::new(width as f32, height as f32);
+
             let settings = CelestialSketcherSettings {
-                output_size: Vec2::new(width as f32, height as f32),
+                output_size,
                 object_count,
+                render_count: render_count.unwrap_or(object_count),
+                object_position: Uniform::new(0.0, width as f32),
                 object_size: Uniform::new(min_mass, max_mass),
                 object_velocity: Uniform::new(minimum_initial_velocity, maximum_initial_velocity),
                 g,
-                render_count: render_count.unwrap_or(object_count),
-                object_position: Uniform::new(0.0, width as f32),
-                foreground: Color::WHITE,
+                foreground: Color::white(),
                 steps,
                 step_length: step_size,
                 render_dots: dots,
             };
 
-            let mut sketcher = CelestialSketcher::new(&settings);
+            let mut sketcher = CelestialSketcher::new(settings);
 
             #[cfg(not(feature = "wasm"))]
             let bar = ProgressBar::new(100);
@@ -257,12 +263,12 @@ fn main() -> anyhow::Result<()> {
             });
 
             save(
-                sketcher.run(|progress| {
+                &sketcher.run(|progress| {
                     #[cfg(not(feature = "wasm"))]
                     bar.set_length((progress * 100.0) as u64);
                 }),
                 output.as_path(),
-                settings.output_size,
+                output_size,
             )?;
         }
     }
@@ -280,7 +286,7 @@ fn save(canvas: &VectorCanvas, path: &Path, size: Vec2) -> anyhow::Result<()> {
                 file.write_all(svg.as_bytes())?;
             }
             "bmp" | "jpg" | "jpeg" | "png" | "tiff" => {
-                let image = canvas.render_rgb(size, 1.0, Some(Color::BLACK));
+                let image = canvas.render_rgb(size, 1.0, Some(Color::black()));
 
                 image.save(path)?;
             }

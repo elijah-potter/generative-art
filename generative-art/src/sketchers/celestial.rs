@@ -6,9 +6,12 @@ use rand::prelude::Distribution;
 #[cfg(feature = "small-rng")]
 use rand::{rngs::SmallRng, SeedableRng};
 
-use super::canvas::{Circle, Color, Line};
-use super::{VectorCanvas, VectorSketcher};
+use super::{
+    vectorcanvas::{Circle, Line},
+    Color, VectorCanvas, VectorSketcher
+};
 
+#[derive(Clone)]
 pub struct CelestialSketcherSettings<P, S, V>
 where
     P: Distribution<f32>,
@@ -58,7 +61,7 @@ impl CelestialSketcher {
     /// Allows to define how many of the simulated objects are rendered.
     /// If the render count is greater than the object count, it panics.
     pub fn new<P: Distribution<f32>, S: Distribution<f32>, V: Distribution<f32>>(
-        settings: &CelestialSketcherSettings<P, S, V>,
+        settings: CelestialSketcherSettings<P, S, V>,
         #[cfg(feature = "small-rng")] seed: u64,
     ) -> Self {
         #[cfg(feature = "thread-rng")]
@@ -161,8 +164,11 @@ impl CelestialSketcher {
     }
 }
 
-impl VectorSketcher for CelestialSketcher {
-    fn run<F: Fn(f32)>(&mut self, before_iter: F) -> &VectorCanvas {
+impl<F> VectorSketcher<F> for CelestialSketcher
+where
+    F: Fn(f32),
+{
+    fn run(&mut self, before_iter: F) -> VectorCanvas {
         for i in 0..self.steps {
             before_iter(i as f32 / self.steps as f32);
 
@@ -171,7 +177,7 @@ impl VectorSketcher for CelestialSketcher {
 
         self.render();
 
-        &self.canvas
+        self.canvas.clone()
     }
 }
 

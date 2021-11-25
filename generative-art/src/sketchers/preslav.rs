@@ -4,11 +4,9 @@ use rand::{prelude::Distribution, Rng};
 #[cfg(feature = "small-rng")]
 use rand::{rngs::SmallRng, SeedableRng};
 
-use super::{
-    canvas::{Color, RegularPolygon},
-    VectorCanvas, VectorSketcher,
-};
+use super::{Color, VectorCanvas, VectorSketcher, rastercanvas::RasterCanvas, vectorcanvas::RegularPolygon};
 
+#[derive(Clone)]
 pub struct PreslavSketcherSettings<E>
 where
     E: Distribution<usize> + Clone,
@@ -35,7 +33,7 @@ where
     /// The number of shapes to render.
     pub shapes: usize,
     /// The image to sample from.
-    pub input_image: RgbImage,
+    pub input_image: RasterCanvas,
 }
 
 /// Art generator based on Preslav's Book *Generative Art in Go*
@@ -52,7 +50,7 @@ where
     stroke_size: f32,
     stroke_reduction: f32,
     shapes: usize,
-    input_image: RgbImage,
+    input_image: RasterCanvas,
     canvas: VectorCanvas,
     #[cfg(feature = "small-rng")]
     rng: SmallRng,
@@ -63,7 +61,7 @@ where
     E: Distribution<usize> + Clone,
 {
     pub fn new(
-        settings: &PreslavSketcherSettings<E>,
+        settings: PreslavSketcherSettings<E>,
         #[cfg(feature = "small-rng")] seed: u64,
     ) -> Self {
         Self {
@@ -71,12 +69,12 @@ where
             stroke_inversion_threshold: settings.stroke_inversion_threshold,
             alpha: settings.initial_alpha,
             alpha_increase: settings.alpha_increase,
-            edge_count: settings.edge_count.clone(),
+            edge_count: settings.edge_count,
             initial_stroke_size: settings.initial_stroke_size,
             stroke_size: settings.initial_stroke_size,
             stroke_reduction: settings.stroke_reduction,
             shapes: settings.shapes,
-            input_image: settings.input_image.to_owned(),
+            input_image: settings.input_image,
             canvas: VectorCanvas::default(),
             #[cfg(feature = "small-rng")]
             rng: SmallRng::seed_from_u64(seed),
@@ -99,12 +97,12 @@ where
         );
 
         let edge_count = (&self.edge_count).sample(&mut rng);
-        let mut color: Color = self.input_image.get_pixel(x as u32, y as u32).into();
-        color.a = self.alpha;
+        let mut color: Color = self.input_image.get_pixel(x as usize, y as usize);
+        *color.a_mut() = self.alpha;
 
         let edge_color =
             if self.stroke_size <= self.stroke_inversion_threshold * self.initial_stroke_size {
-                if color.r + color.g + color.b / 3.0 < 0.5 {
+                if color.r() + color.g() + color.b() / 3.0 < 0.5 {
                     Some(Color::new(1.0, 1.0, 1.0, self.alpha * 2.0))
                 } else {
                     Some(Color::new(0.0, 0.0, 0.0, self.alpha * 2.0))
@@ -127,17 +125,18 @@ where
     }
 }
 
-impl<E> VectorSketcher for PreslavSketcher<E>
+impl<E, F> VectorSketcher<F> for PreslavSketcher<E>
 where
     E: Distribution<usize> + Clone,
+    F: Fn(f32)
 {
-    fn run<F: Fn(f32)>(&mut self, before_iter: F) -> &VectorCanvas {
+    fn run(&mut self, before_iter: F) -> VectorCanvas {
         for i in 0..self.shapes {
             before_iter(i as f32 / self.shapes as f32);
 
             self.draw_shape();
         }
 
-        &self.canvas
+        self.canvas.clone()
     }
 }

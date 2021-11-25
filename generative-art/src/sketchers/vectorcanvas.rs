@@ -4,9 +4,11 @@ use std::{
 };
 
 use glam::Vec2;
-use image::{Rgb, Rgba, RgbaImage};
+use image::{RgbaImage};
 
-#[derive(Default)]
+use super::Color;
+
+#[derive(Default, Clone)]
 pub struct VectorCanvas {
     elements: Vec<Box<dyn VectorElement<String>>>,
 }
@@ -57,91 +59,30 @@ impl VectorCanvas {
     }
 }
 
-pub trait VectorElement<W: Write> {
+pub trait VectorElement<W: Write>: VectorElementClone<W> {
     /// Converts the type to an SVG String.
     fn write_svg(&self, w: &mut W) -> fmt::Result;
 }
 
-/// Color of an object.
-/// Range is 0..1.
-#[derive(Clone, Copy)]
-pub struct Color {
-    pub r: f32,
-    pub g: f32,
-    pub b: f32,
-    pub a: f32,
+/// Blanket trait that allows all VectorElements to be cloneable.
+pub trait VectorElementClone<W> {
+    fn clone_box(&self) -> Box<dyn VectorElement<W>>;
 }
 
-impl Color {
-    pub const WHITE: Self = Color::new(1.0, 1.0, 1.0, 1.0);
-    pub const BLACK: Self = Color::new(0.0, 0.0, 0.0, 1.0);
-
-    pub const fn new(r: f32, g: f32, b: f32, a: f32) -> Self {
-        Self { r, g, b, a }
-    }
-
-    /// Get as a hex string. Alpha is optional.
-    pub fn as_hex(&self, include_alpha: bool) -> String {
-        if include_alpha {
-            format!(
-                "#{:02X}{:02X}{:02X}{:02X}",
-                (self.r * 255.0) as u8,
-                (self.g * 255.0) as u8,
-                (self.b * 255.0) as u8,
-                (self.a * 255.0) as u8
-            )
-        } else {
-            format!(
-                "#{:02X}{:02X}{:02X}",
-                (self.r * 255.0) as u8,
-                (self.g * 255.0) as u8,
-                (self.b * 255.0) as u8
-            )
-        }
+impl<T, W> VectorElementClone<W> for T
+where
+    W: Write,
+    T: 'static + VectorElement<W> + Clone,
+{
+    fn clone_box(&self) -> Box<dyn VectorElement<W>> {
+        Box::new(self.clone())
     }
 }
 
-impl From<Rgb<u8>> for Color {
-    fn from(rgb: Rgb<u8>) -> Self {
-        Color {
-            r: rgb.0[0] as f32 / 255.0,
-            g: rgb.0[1] as f32 / 255.0,
-            b: rgb.0[2] as f32 / 255.0,
-            a: 1.0,
-        }
-    }
-}
-
-impl From<&Rgb<u8>> for Color {
-    fn from(rgb: &Rgb<u8>) -> Self {
-        Color {
-            r: rgb.0[0] as f32 / 255.0,
-            g: rgb.0[1] as f32 / 255.0,
-            b: rgb.0[2] as f32 / 255.0,
-            a: 1.0,
-        }
-    }
-}
-
-impl From<Rgba<u8>> for Color {
-    fn from(rgb: Rgba<u8>) -> Self {
-        Color {
-            r: rgb.0[0] as f32 / 255.0,
-            g: rgb.0[1] as f32 / 255.0,
-            b: rgb.0[2] as f32 / 255.0,
-            a: rgb.0[3] as f32 / 255.0,
-        }
-    }
-}
-
-impl From<&Rgba<u8>> for Color {
-    fn from(rgb: &Rgba<u8>) -> Self {
-        Color {
-            r: rgb.0[0] as f32 / 255.0,
-            g: rgb.0[1] as f32 / 255.0,
-            b: rgb.0[2] as f32 / 255.0,
-            a: rgb.0[3] as f32 / 255.0,
-        }
+// We can now implement Clone manually by forwarding to clone_box.
+impl<W> Clone for Box<dyn VectorElement<W>> {
+    fn clone(&self) -> Box<dyn VectorElement<W>> {
+        self.clone_box()
     }
 }
 
@@ -167,8 +108,8 @@ impl<W: Write> VectorElement<W> for Line {
             self.radius * 2.0
         )?;
 
-        if self.color.a < 1.0 {
-            write!(w, "stroke-opacity=\"{}\" ", self.color.a)?;
+        if self.color.a() < 1.0 {
+            write!(w, "stroke-opacity=\"{}\" ", self.color.a())?;
         }
 
         write!(w, "/>")
@@ -192,15 +133,15 @@ impl<W: Write> VectorElement<W> for Polygon {
 
         write!(w, "\" fill=\"{}\" ", self.color.as_hex(false))?;
 
-        if self.color.a < 1.0 {
-            write!(w, "fill-opacity=\"{}\" ", self.color.a)?;
+        if self.color.a() < 1.0 {
+            write!(w, "fill-opacity=\"{}\" ", self.color.a())?;
         }
 
         if let Some(outline_color) = self.outline_color {
             write!(w, "stroke=\"{}\" ", outline_color.as_hex(false))?;
 
-            if outline_color.a < 1.0 {
-                write!(w, "stroke-opacity=\"{}\" ", self.color.a)?;
+            if outline_color.a() < 1.0 {
+                write!(w, "stroke-opacity=\"{}\" ", self.color.a())?;
             }
         }
 
