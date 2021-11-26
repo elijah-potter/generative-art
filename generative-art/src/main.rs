@@ -3,22 +3,22 @@ use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 
-use denim::Vec2;
+use canvas::{RasterCanvas, VectorCanvas};
 use denim::renderers::SvgRenderer;
 use denim::renderers::SvgRendererSettings;
+use denim::Color;
+use denim::Vec2;
 use image::Pixel;
 use sketchers::{
-    CelestialSketcher,
-    CelestialSketcherSettings, PreslavSketcher, PreslavSketcherSettings, VectorSketcher,
+    CelestialSketcher, CelestialSketcherSettings, PreslavSketcher, PreslavSketcherSettings,
+    VectorSketcher,
 };
-use canvas::{RasterCanvas, VectorCanvas};
-use denim::Color;
 
 use image::Rgba;
 use image::RgbaImage;
 
-mod helpers;
 mod canvas;
+mod helpers;
 mod sketchers;
 
 use indicatif::ProgressBar;
@@ -272,7 +272,7 @@ fn save(canvas: &VectorCanvas, path: &Path, size: Vec2) -> anyhow::Result<()> {
     if let Some(extension) = path.extension() {
         match extension.to_str().unwrap() {
             "svg" => {
-                let svg = canvas.render::<SvgRenderer>(SvgRendererSettings{
+                let svg = canvas.render::<SvgRenderer>(SvgRendererSettings {
                     size,
                     background_color: Some(Color::black()),
                 });

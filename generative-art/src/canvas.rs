@@ -1,5 +1,5 @@
-use image::RgbaImage;
 use denim::Color;
+use image::RgbaImage;
 
 pub type VectorCanvas = denim::Canvas;
 
@@ -22,7 +22,7 @@ impl RasterCanvas {
     pub fn from_rgba(image: &RgbaImage) -> Self {
         let mut data = Vec::with_capacity(image.width() as usize * image.height() as usize);
 
-        for (_, _, pixel) in image.enumerate_pixels(){
+        for (_, _, pixel) in image.enumerate_pixels() {
             data.push(pixel.into());
         }
 
