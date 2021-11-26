@@ -1,12 +1,13 @@
-use glam::Vec2;
+use denim::{CanvasElement, Stroke, Vec2};
 
 use rand::{prelude::Distribution, Rng};
 #[cfg(feature = "small-rng")]
 use rand::{rngs::SmallRng, SeedableRng};
 
-use super::{
-    rastercanvas::RasterCanvas, vectorcanvas::RegularPolygon, Color, VectorCanvas, VectorSketcher,
-};
+use crate::canvas::{RasterCanvas, VectorCanvas};
+use denim::Color;
+
+use super::VectorSketcher;
 
 #[derive(Clone)]
 pub struct PreslavSketcherSettings<E>
@@ -105,22 +106,28 @@ where
         let edge_color =
             if self.stroke_size <= self.stroke_inversion_threshold * self.initial_stroke_size {
                 if color.r() + color.g() + color.b() / 3.0 < 0.5 {
-                    Some(Color::new(1.0, 1.0, 1.0, self.alpha * 2.0))
+                    Some(Stroke {
+                        color: Color::new(1.0, 1.0, 1.0, self.alpha * 2.0),
+                        width: 1.0,
+                    })
                 } else {
-                    Some(Color::new(0.0, 0.0, 0.0, self.alpha * 2.0))
+                    Some(Stroke {
+                        color: Color::new(0.0, 0.0, 0.0, self.alpha * 2.0),
+                        width: 1.0,
+                    })
                 }
             } else {
                 None
             };
 
-        self.canvas.draw(Box::new(RegularPolygon {
-            center: d,
-            sides: edge_count,
-            rotation: rng.gen(),
-            radius: self.stroke_size,
-            color,
-            outline_color: edge_color,
-        }));
+        self.canvas.draw(CanvasElement {
+            variant: denim::CanvasElementVariant::Polygon {
+                points: denim::regular_polygon_points(d, edge_count, self.stroke_size, rng.gen()),
+                fill: Some(color),
+                stroke: edge_color,
+            },
+            ..Default::default()
+        });
 
         self.stroke_size -= self.stroke_reduction * self.stroke_size;
         self.alpha += self.alpha_increase;

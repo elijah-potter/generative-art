@@ -3,18 +3,22 @@ use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 
-use glam::Vec2;
+use denim::Vec2;
+use denim::renderers::SvgRenderer;
+use denim::renderers::SvgRendererSettings;
 use image::Pixel;
 use sketchers::{
-    rastercanvas::RasterCanvas, vectorcanvas::VectorCanvas, CelestialSketcher,
-    CelestialSketcherSettings, Color, PreslavSketcher, PreslavSketcherSettings, VectorSketcher,
+    CelestialSketcher,
+    CelestialSketcherSettings, PreslavSketcher, PreslavSketcherSettings, VectorSketcher,
 };
+use canvas::{RasterCanvas, VectorCanvas};
+use denim::Color;
 
 use image::Rgba;
 use image::RgbaImage;
 
 mod helpers;
-mod pipeline;
+mod canvas;
 mod sketchers;
 
 use indicatif::ProgressBar;
@@ -186,7 +190,7 @@ fn main() -> anyhow::Result<()> {
 
             let final_canvas = sketcher.run(|progress| {
                 #[cfg(not(feature = "wasm"))]
-                bar.set_length((progress * 100.0) as u64);
+                bar.set_position((progress * 100.0) as u64);
             });
 
             save(&final_canvas, output.as_path(), output_size)?;
@@ -250,15 +254,10 @@ fn main() -> anyhow::Result<()> {
             #[cfg(not(feature = "wasm"))]
             let bar = ProgressBar::new(100);
 
-            sketcher.run(|progress| {
-                #[cfg(not(feature = "wasm"))]
-                bar.set_length((progress * 100.0) as u64);
-            });
-
             save(
                 &sketcher.run(|progress| {
                     #[cfg(not(feature = "wasm"))]
-                    bar.set_length((progress * 100.0) as u64);
+                    bar.set_position((progress * 100.0) as u64);
                 }),
                 output.as_path(),
                 output_size,
@@ -273,15 +272,16 @@ fn save(canvas: &VectorCanvas, path: &Path, size: Vec2) -> anyhow::Result<()> {
     if let Some(extension) = path.extension() {
         match extension.to_str().unwrap() {
             "svg" => {
-                let svg = canvas.render_svg(size, Some(Color::new(0.0, 0.0, 0.0, 1.0)));
+                let svg = canvas.render::<SvgRenderer>(SvgRendererSettings{
+                    size,
+                    background_color: Some(Color::black()),
+                });
 
                 let mut file = File::create(path)?;
                 file.write_all(svg.as_bytes())?;
             }
             "bmp" | "jpg" | "jpeg" | "png" | "tiff" => {
-                let image = canvas.render_rgb(size, 1.0, Some(Color::black()));
-
-                image.save(path)?;
+                todo!();
             }
             _ => println!("Couldn't save with that extension."),
         }

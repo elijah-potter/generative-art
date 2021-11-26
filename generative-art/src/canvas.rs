@@ -1,6 +1,7 @@
 use image::RgbaImage;
+use denim::Color;
 
-use super::Color;
+pub type VectorCanvas = denim::Canvas;
 
 #[derive(Clone)]
 pub struct RasterCanvas {
@@ -21,16 +22,8 @@ impl RasterCanvas {
     pub fn from_rgba(image: &RgbaImage) -> Self {
         let mut data = Vec::with_capacity(image.width() as usize * image.height() as usize);
 
-        let flat = image.as_flat_samples();
-
-        for i in 0..(flat.samples.len()) / 4 {
-            let i = i * 3;
-            data.push(Color::new(
-                flat.samples[i] as f32 / 255.0,
-                flat.samples[i + 1] as f32 / 255.0,
-                flat.samples[i + 2] as f32 / 255.0,
-                flat.samples[i + 3] as f32 / 255.0,
-            ))
+        for (_, _, pixel) in image.enumerate_pixels(){
+            data.push(pixel.into());
         }
 
         Self {

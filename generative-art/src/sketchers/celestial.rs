@@ -1,15 +1,15 @@
 use std::f32::consts::PI;
 
-use glam::Vec2;
+use denim::Vec2;
 
 use rand::prelude::Distribution;
 #[cfg(feature = "small-rng")]
 use rand::{rngs::SmallRng, SeedableRng};
 
-use super::{
-    vectorcanvas::{Circle, Line},
-    Color, VectorCanvas, VectorSketcher,
-};
+use crate::VectorSketcher;
+
+use crate::canvas::VectorCanvas;
+use denim::{CanvasElement, CanvasElementVariant, Color, Stroke};
 
 #[derive(Clone)]
 pub struct CelestialSketcherSettings<P, S, V>
@@ -137,21 +137,30 @@ impl CelestialSketcher {
             let radius = (object.mass / PI).sqrt();
 
             if self.render_dots {
-                for _position in &object.path {
-                    if self.inside_view(object.position, radius) {
-                        self.canvas.draw(Box::new(Circle {
-                            center: object.position,
-                            radius,
-                            color: self.foreground,
-                        }));
+                for position in &object.path {
+                    if self.inside_view(*position, radius) {
+                        self.canvas.draw(CanvasElement {
+                            variant: CanvasElementVariant::Circle {
+                                center: *position,
+                                radius,
+                                fill: Some(self.foreground),
+                                stroke: None,
+                            },
+                            ..Default::default()
+                        });
                     }
                 }
             } else {
-                self.canvas.draw(Box::new(Line {
-                    points: object.path.to_owned(),
-                    radius,
-                    color: self.foreground,
-                }))
+                self.canvas.draw(CanvasElement {
+                    variant: CanvasElementVariant::PolyLine {
+                        points: object.path.clone(),
+                        stroke: Stroke {
+                            color: self.foreground,
+                            width: radius * 2.0,
+                        },
+                    },
+                    ..Default::default()
+                })
             }
         }
     }
