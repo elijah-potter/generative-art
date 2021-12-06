@@ -1,15 +1,12 @@
 use std::f32::consts::PI;
 
-use denim::Vec2;
-
 use rand::prelude::Distribution;
 #[cfg(feature = "small-rng")]
 use rand::{rngs::SmallRng, SeedableRng};
 
-use crate::VectorSketcher;
-
-use crate::canvas::VectorCanvas;
-use denim::{CanvasElement, CanvasElementVariant, Color, Stroke};
+use crate::canvas::{OmniCanvas, VectorCanvas};
+use crate::sketchers::Sketcher;
+use denim::{CanvasElement, CanvasElementVariant, Color, Stroke, Vec2};
 
 #[derive(Clone)]
 pub struct CelestialSketcherSettings<P, S, V>
@@ -132,17 +129,17 @@ impl CelestialSketcher {
     fn render(&mut self) {
         self.canvas = VectorCanvas::default();
 
-        for index in 0..self.render_count {
-            let object = &self.objects[index];
-            let radius = (object.mass / PI).sqrt();
+        if self.render_dots {
+            for i in 0..self.objects[0].path.len() {
+                for object in &self.objects {
+                    let position = object.path[i];
+                    let radius = (object.mass / PI).sqrt();
 
-            if self.render_dots {
-                for position in &object.path {
-                    if self.inside_view(*position, radius) {
+                    if self.inside_view(position, radius) {
                         self.canvas.draw(CanvasElement {
-                            variant: CanvasElementVariant::Circle {
-                                center: *position,
-                                radius,
+                            variant: CanvasElementVariant::Ellipse {
+                                center: position,
+                                radius: Vec2::splat(radius),
                                 fill: Some(self.foreground),
                                 stroke: None,
                             },
@@ -150,7 +147,12 @@ impl CelestialSketcher {
                         });
                     }
                 }
-            } else {
+            }
+        } else {
+            for index in 0..self.render_count {
+                let object = &self.objects[index];
+                let radius = (object.mass / PI).sqrt();
+
                 self.canvas.draw(CanvasElement {
                     variant: CanvasElementVariant::PolyLine {
                         points: object.path.clone(),
@@ -173,11 +175,11 @@ impl CelestialSketcher {
     }
 }
 
-impl<F> VectorSketcher<F> for CelestialSketcher
+impl<F> Sketcher<F> for CelestialSketcher
 where
     F: Fn(f32),
 {
-    fn run(&mut self, before_iter: F) -> VectorCanvas {
+    fn run(&mut self, before_iter: F) -> OmniCanvas {
         for i in 0..self.steps {
             before_iter(i as f32 / self.steps as f32);
 
@@ -186,7 +188,7 @@ where
 
         self.render();
 
-        self.canvas.clone()
+        self.canvas.clone().into()
     }
 }
 

@@ -20,4 +20,5 @@ image = { version = "0.23.14", default-features = false, features = [
 indicatif = "0.16.2"
 rand = { version = "0.8.4", default-features = false }
 structopt = "0.3.25"
-denim = { git= "https://github.com/chilipepperhott/denim"}
+# denim = { git = "https://github.com/chilipepperhott/denim" }
+denim = { path = "../../denim", features = ["obj_renderer"] }

@@ -1,13 +1,11 @@
-use denim::{CanvasElement, Stroke, Vec2};
+use denim::{CanvasElement, Color, Stroke, Vec2};
 
 use rand::{prelude::Distribution, Rng};
 #[cfg(feature = "small-rng")]
 use rand::{rngs::SmallRng, SeedableRng};
 
-use crate::canvas::{RasterCanvas, VectorCanvas};
-use denim::Color;
-
-use super::VectorSketcher;
+use super::Sketcher;
+use crate::canvas::{OmniCanvas, RasterCanvas, VectorCanvas};
 
 #[derive(Clone)]
 pub struct PreslavSketcherSettings<E>
@@ -35,8 +33,6 @@ where
     pub stroke_reduction: f32,
     /// The number of shapes to render.
     pub shapes: usize,
-    /// The image to sample from.
-    pub input_image: RasterCanvas,
 }
 
 /// Art generator based on Preslav's Book *Generative Art in Go*
@@ -64,6 +60,7 @@ where
     E: Distribution<usize> + Clone,
 {
     pub fn new(
+        input_image: RasterCanvas,
         settings: PreslavSketcherSettings<E>,
         #[cfg(feature = "small-rng")] seed: u64,
     ) -> Self {
@@ -77,11 +74,16 @@ where
             stroke_size: settings.initial_stroke_size,
             stroke_reduction: settings.stroke_reduction,
             shapes: settings.shapes,
-            input_image: settings.input_image,
+            input_image,
             canvas: VectorCanvas::default(),
             #[cfg(feature = "small-rng")]
             rng: SmallRng::seed_from_u64(seed),
         }
+    }
+
+    /// Consumes the sketcher and returns the input image.
+    pub fn take_input(self) -> RasterCanvas {
+        self.input_image
     }
 
     /// Runs the next step of the algorithm, thereby painting a new polygon.
@@ -134,18 +136,18 @@ where
     }
 }
 
-impl<E, F> VectorSketcher<F> for PreslavSketcher<E>
+impl<E, F> Sketcher<F> for PreslavSketcher<E>
 where
     E: Distribution<usize> + Clone,
     F: Fn(f32),
 {
-    fn run(&mut self, before_iter: F) -> VectorCanvas {
+    fn run(&mut self, before_iter: F) -> OmniCanvas {
         for i in 0..self.shapes {
             before_iter(i as f32 / self.shapes as f32);
 
             self.draw_shape();
         }
 
-        self.canvas.clone()
+        self.canvas.clone().into()
     }
 }
