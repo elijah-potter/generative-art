@@ -1,9 +1,6 @@
-use denim::{
-    renderers::skia_renderer::{SkiaRenderer, SkiaRendererSettings},
-    Color, Renderer, UVec2, Vec2,
-};
+use denim::{Color, Renderer, Vec2};
 use rand::distributions::Uniform;
-use sketchers::{CelestialSketcher, CelestialSketcherSettings, FragmentSketcher, Sketcher};
+use sketchers::{CelestialSketcher, CelestialSketcherSettings, Sketcher};
 
 mod canvas;
 mod helpers;

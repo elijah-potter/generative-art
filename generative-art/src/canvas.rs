@@ -1,10 +1,7 @@
-use std::{
-    fs, io,
-    path::{Path, PathBuf},
-};
+use std::{fs, io, path::PathBuf};
 
 use denim::{
-    rect_polygon_points, regular_polygon_points,
+    rect_polygon_points,
     renderers::{
         skia_renderer::{SkiaRenderer, SkiaRendererSettings},
         svg_renderer::{SvgRenderer, SvgRendererSettings},
@@ -105,7 +102,7 @@ impl OmniCanvas {
     }
 
     /// Save the OmniCanvas to a file.
-    /// 
+    ///
     /// Can save to:
     /// * Png
     /// * Jpg
