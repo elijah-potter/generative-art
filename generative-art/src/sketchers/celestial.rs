@@ -6,7 +6,7 @@ use rand::{rngs::SmallRng, SeedableRng};
 
 use crate::canvas::{OmniCanvas, VectorCanvas};
 use crate::sketchers::Sketcher;
-use denim::{Color, Stroke, Vec2, LineEnd};
+use denim::{Color, LineEnd, Stroke, Vec2};
 
 #[derive(Clone)]
 pub struct CelestialSketcherSettings<P, S, V>
@@ -149,7 +149,7 @@ impl CelestialSketcher {
                     Some(Stroke {
                         color: self.foreground,
                         width: radius * 2.0,
-                        line_end: LineEnd::Round
+                        line_end: LineEnd::Round,
                     }),
                     None,
                 );

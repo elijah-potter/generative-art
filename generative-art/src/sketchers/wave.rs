@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
-use denim::{Stroke, Vec2};
 use crate::canvas::{OmniCanvas, RasterCanvas, VectorCanvas};
+use denim::{Stroke, Vec2};
 
 use super::Sketcher;
 
@@ -104,7 +104,7 @@ impl WaveSketcher {
                             Some(Stroke {
                                 color: self.settings.stroke.color,
                                 width: self.settings.stroke.width * delta_a * 10.0,
-                                line_end: self.settings.stroke.line_end
+                                line_end: self.settings.stroke.line_end,
                             }),
                             None,
                         );

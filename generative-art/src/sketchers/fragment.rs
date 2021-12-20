@@ -69,10 +69,7 @@ where
     F: Fn(&mut Shape),
 {
     pub fn new(canvas: VectorCanvas, kernel: F) -> Self {
-        Self {
-            kernel,
-            canvas,
-        }
+        Self { kernel, canvas }
     }
 
     fn run_kernel<P: Fn(f32)>(&mut self, before_iter: P) {

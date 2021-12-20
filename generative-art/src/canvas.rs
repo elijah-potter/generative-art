@@ -1,6 +1,9 @@
 use std::{fs, io, path::PathBuf};
 
-use denim::{Color, UVec2, Vec2, renderers::{SkiaRenderer, SkiaRendererSettings, SvgRenderer, SvgRendererSettings}, RgbaImage};
+use denim::{
+    renderers::{SkiaRenderer, SkiaRendererSettings, SvgRenderer, SvgRendererSettings},
+    Color, RgbaImage, UVec2, Vec2,
+};
 
 /// Which algorithm to use when vectorizing a [RasterCanvas].
 pub enum VectorizerStyle {
@@ -48,8 +51,7 @@ impl OmniCanvas {
         match self {
             OmniCanvas::VectorCanvas { inner } => inner,
             OmniCanvas::RasterCanvas { mut inner } => {
-                let mut vector =
-                    VectorCanvas::new();
+                let mut vector = VectorCanvas::new();
                 match style {
                     VectorizerStyle::Pixels => {
                         let width = inner.width();
@@ -83,15 +85,14 @@ impl OmniCanvas {
         background_color: Option<Color>,
     ) -> RasterCanvas {
         match self {
-            OmniCanvas::VectorCanvas { inner } => RasterCanvas::from_rgba(
-                &inner
-                    .render::<SkiaRenderer>(SkiaRendererSettings {
-                        size: resolution,
-                        background: background_color,
-                        antialias,
-                        preserve_height: false
-                    }),
-            ),
+            OmniCanvas::VectorCanvas { inner } => {
+                RasterCanvas::from_rgba(&inner.render::<SkiaRenderer>(SkiaRendererSettings {
+                    size: resolution,
+                    background: background_color,
+                    antialias,
+                    preserve_height: false,
+                }))
+            }
             OmniCanvas::RasterCanvas { inner } => inner,
         }
     }
@@ -130,7 +131,7 @@ impl OmniCanvas {
                             size,
                             background: background_color,
                             ints_only: false,
-                            preserve_height: false
+                            preserve_height: false,
                         }),
                 )?;
             }
@@ -212,10 +213,10 @@ impl RasterCanvas {
 
     /// Gets a pixel from the canvas. If the requested pixel is out of range, it will return [Color::black()]
     pub fn get_pixel(&mut self, x: usize, y: usize) -> Color {
-        if x >= self.width() || y >= self.height(){
+        if x >= self.width() || y >= self.height() {
             return Color::black();
         }
-        
+
         self.image[y * self.width + x]
     }
 
