@@ -4,6 +4,8 @@ version = "0.2.0"
 authors = ["Elijah Potter <elijah.sirius@protonmail.com>"]
 edition = "2021"
 
+[lib]
+
 [features]
 default = ["thread-rng"]
 small-rng = ["rand/small_rng"]
@@ -11,14 +13,9 @@ thread-rng = ["rand/std", "rand/std_rng"]
 
 [dependencies]
 anyhow = "1.0.45"
-image = { version = "0.23.14", default-features = false, features = [
-    "jpeg",
-    "png",
-    "tiff",
-    "bmp",
-] }
 indicatif = "0.16.2"
 rand = { version = "0.8.4", default-features = false }
 structopt = "0.3.25"
 # denim = { git = "https://github.com/chilipepperhott/denim" }
-denim = { path = "../../denim", features = ["obj_renderer"] }
+denim = {path = "../../denim"}
+image = "0.23.14"

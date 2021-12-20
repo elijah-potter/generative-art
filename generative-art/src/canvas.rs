@@ -1,14 +1,6 @@
 use std::{fs, io, path::PathBuf};
 
-use denim::{
-    rect_polygon_points,
-    renderers::{
-        skia_renderer::{SkiaRenderer, SkiaRendererSettings},
-        svg_renderer::{SvgRenderer, SvgRendererSettings},
-    },
-    CanvasElement, CanvasElementVariant, Color, UVec2, Vec2,
-};
-use image::RgbaImage;
+use denim::{Color, UVec2, Vec2, renderers::{SkiaRenderer, SkiaRendererSettings, SvgRenderer, SvgRendererSettings}, RgbaImage};
 
 /// Which algorithm to use when vectorizing a [RasterCanvas].
 pub enum VectorizerStyle {
@@ -37,8 +29,14 @@ impl OmniCanvas {
     /// If the OmniCanvas is a [VectorCanvas], it does conversion using [SkiaRenderer](denim::renderers::skia_renderer::SkiaRenderer).
     ///
     /// Be warned: this operation is expensive if the [OmniCanvas] is [RasterCanvas](OmniCanvas::RasterCanvas).
-    pub fn as_raster_canvas(&self, resolution: UVec2) -> RasterCanvas {
-        self.clone().into_raster_canvas(resolution)
+    pub fn as_raster_canvas(
+        &self,
+        resolution: UVec2,
+        anti_alias: bool,
+        background_color: Option<Color>,
+    ) -> RasterCanvas {
+        self.clone()
+            .into_raster_canvas(resolution, anti_alias, background_color)
     }
 
     /// Consume the [OmniCanvas] and return a [VectorCanvas].
@@ -50,7 +48,8 @@ impl OmniCanvas {
         match self {
             OmniCanvas::VectorCanvas { inner } => inner,
             OmniCanvas::RasterCanvas { mut inner } => {
-                let mut vector = VectorCanvas::default();
+                let mut vector =
+                    VectorCanvas::new();
                 match style {
                     VectorizerStyle::Pixels => {
                         let width = inner.width();
@@ -58,17 +57,12 @@ impl OmniCanvas {
 
                         for x in 0..width {
                             for y in 0..height {
-                                vector.draw(CanvasElement {
-                                    variant: CanvasElementVariant::Polygon {
-                                        points: rect_polygon_points(
-                                            Vec2::new(x as f32, y as f32),
-                                            Vec2::new((x + 1) as f32, (y + 1) as f32),
-                                        ),
-                                        fill: Some(inner.get_pixel(x, y)),
-                                        stroke: None,
-                                    },
-                                    ..Default::default()
-                                })
+                                vector.draw_rect(
+                                    Vec2::new(x as f32, y as f32),
+                                    Vec2::new((x + 1) as f32, (y + 1) as f32),
+                                    None,
+                                    Some(inner.get_pixel(x, y)),
+                                );
                             }
                         }
                     }
@@ -82,20 +76,21 @@ impl OmniCanvas {
     /// Consume the [OmniCanvas] and return a [RasterCanvas].
     ///
     /// If the OmniCanvas is a [VectorCanvas], it does conversion using [SkiaRenderer](denim::renderers::skia_renderer::SkiaRenderer).
-    pub fn into_raster_canvas(self, resolution: UVec2) -> RasterCanvas {
+    pub fn into_raster_canvas(
+        self,
+        resolution: UVec2,
+        antialias: bool,
+        background_color: Option<Color>,
+    ) -> RasterCanvas {
         match self {
             OmniCanvas::VectorCanvas { inner } => RasterCanvas::from_rgba(
-                &RgbaImage::from_raw(
-                    resolution.x,
-                    resolution.y,
-                    inner
-                        .render::<SkiaRenderer>(SkiaRendererSettings {
-                            size: resolution,
-                            background_color: None,
-                        })
-                        .take(),
-                )
-                .unwrap(),
+                &inner
+                    .render::<SkiaRenderer>(SkiaRendererSettings {
+                        size: resolution,
+                        background: background_color,
+                        antialias,
+                        preserve_height: false
+                    }),
             ),
             OmniCanvas::RasterCanvas { inner } => inner,
         }
@@ -119,7 +114,11 @@ impl OmniCanvas {
 
         match path.extension().map(|v| v.to_str().unwrap()) {
             Some("bmp") | Some("png") | Some("jpg") | Some("tiff") => {
-                if let Err(err) = self.as_raster_canvas(size.as_uvec2()).as_rgba().save(path) {
+                if let Err(err) = self
+                    .as_raster_canvas(size.as_uvec2(), true, background_color)
+                    .as_rgba()
+                    .save(path)
+                {
                     return Err(io::Error::new(io::ErrorKind::Other, err));
                 }
             }
@@ -129,7 +128,9 @@ impl OmniCanvas {
                     self.as_vector_canvas(VectorizerStyle::Pixels)
                         .render::<SvgRenderer>(SvgRendererSettings {
                             size,
-                            background_color,
+                            background: background_color,
+                            ints_only: false,
+                            preserve_height: false
                         }),
                 )?;
             }
@@ -209,7 +210,12 @@ impl RasterCanvas {
         self.image[y * self.width + x] = color;
     }
 
+    /// Gets a pixel from the canvas. If the requested pixel is out of range, it will return [Color::black()]
     pub fn get_pixel(&mut self, x: usize, y: usize) -> Color {
+        if x >= self.width() || y >= self.height(){
+            return Color::black();
+        }
+        
         self.image[y * self.width + x]
     }
 

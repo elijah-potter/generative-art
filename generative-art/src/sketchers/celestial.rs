@@ -6,7 +6,7 @@ use rand::{rngs::SmallRng, SeedableRng};
 
 use crate::canvas::{OmniCanvas, VectorCanvas};
 use crate::sketchers::Sketcher;
-use denim::{CanvasElement, CanvasElementVariant, Color, Stroke, Vec2};
+use denim::{Color, Stroke, Vec2, LineEnd};
 
 #[derive(Clone)]
 pub struct CelestialSketcherSettings<P, S, V>
@@ -15,8 +15,6 @@ where
     S: Distribution<f32>,
     V: Distribution<f32>,
 {
-    /// The size of the rendered output in universe space.
-    pub output_size: Vec2,
     /// The number of objects to simulate.
     pub object_count: usize,
     /// The number of objects to include in the render.
@@ -35,19 +33,18 @@ where
     pub steps: usize,
     /// How much time should pass between steps.
     pub step_length: f32,
-    /// Whether to render object paths as dots instead of as a path.
-    pub render_dots: bool,
+    /// Whether to render object paths as a series of regular polygons instead of as a path.
+    pub render_polygon: Option<usize>,
 }
 
 pub struct CelestialSketcher {
-    canvas_size: Vec2,
     objects: Vec<CelestialObject>,
     render_count: usize,
     g: f32,
     foreground: Color,
     steps: usize,
     step_length: f32,
-    render_dots: bool,
+    render_polygon: Option<usize>,
     canvas: VectorCanvas,
 }
 
@@ -70,8 +67,6 @@ impl CelestialSketcher {
         let _total_energy = Vec2::ZERO;
 
         while objects.len() < settings.object_count {
-            let _radius = settings.output_size.y;
-
             let position = Vec2::new(
                 settings.object_position.sample(&mut rng),
                 settings.object_position.sample(&mut rng),
@@ -93,15 +88,14 @@ impl CelestialSketcher {
         }
 
         Self {
-            canvas_size: settings.output_size,
             objects,
             render_count: settings.render_count,
             g: settings.g,
             foreground: settings.foreground,
             steps: settings.steps,
             step_length: settings.step_length,
-            render_dots: settings.render_dots,
-            canvas: VectorCanvas::default(),
+            render_polygon: settings.render_polygon,
+            canvas: VectorCanvas::new(),
         }
     }
 
@@ -127,51 +121,51 @@ impl CelestialSketcher {
 
     /// Renders the path of a given number of objects.
     fn render(&mut self) {
-        self.canvas = VectorCanvas::default();
+        self.canvas = VectorCanvas::new();
 
-        if self.render_dots {
+        if let Some(sides) = self.render_polygon {
             for i in 0..self.objects[0].path.len() {
                 for object in &self.objects {
                     let position = object.path[i];
-                    let radius = (object.mass / PI).sqrt();
+                    let radius = (object.mass / PI).sqrt() / 5000.0;
 
-                    if self.inside_view(position, radius) {
-                        self.canvas.draw(CanvasElement {
-                            variant: CanvasElementVariant::Ellipse {
-                                center: position,
-                                radius: Vec2::splat(radius),
-                                fill: Some(self.foreground),
-                                stroke: None,
-                            },
-                            ..Default::default()
-                        });
-                    }
+                    self.canvas.draw_regular_polygon(
+                        position,
+                        sides,
+                        radius,
+                        0.0,
+                        None,
+                        Some(self.foreground),
+                    )
                 }
             }
         } else {
             for index in 0..self.render_count {
                 let object = &self.objects[index];
-                let radius = (object.mass / PI).sqrt();
+                let radius = (object.mass / PI).sqrt() / 5000.0;
 
-                self.canvas.draw(CanvasElement {
-                    variant: CanvasElementVariant::PolyLine {
-                        points: object.path.clone(),
-                        stroke: Stroke {
-                            color: self.foreground,
-                            width: radius * 2.0,
-                        },
-                    },
-                    ..Default::default()
-                })
+                self.canvas.draw_shape(
+                    object.path.clone(),
+                    Some(Stroke {
+                        color: self.foreground,
+                        width: radius * 2.0,
+                        line_end: LineEnd::Round
+                    }),
+                    None,
+                );
             }
         }
     }
 
-    fn inside_view(&self, pos: Vec2, radius: f32) -> bool {
-        pos.x > -radius
-            && pos.y > -radius
-            && pos.x < self.canvas_size.x + radius
-            && pos.y < self.canvas_size.y + radius
+    /// Simulates and renders the system.
+    fn run<P: Fn(f32)>(&mut self, before_iter: P) {
+        for i in 0..self.steps {
+            before_iter(i as f32 / self.steps as f32);
+
+            self.step();
+        }
+
+        self.render();
     }
 }
 
@@ -180,15 +174,15 @@ where
     F: Fn(f32),
 {
     fn run(&mut self, before_iter: F) -> OmniCanvas {
-        for i in 0..self.steps {
-            before_iter(i as f32 / self.steps as f32);
-
-            self.step();
-        }
-
-        self.render();
+        self.run(before_iter);
 
         self.canvas.clone().into()
+    }
+
+    fn run_and_dispose(mut self, before_iter: F) -> OmniCanvas {
+        self.run(before_iter);
+
+        self.canvas.into()
     }
 }
 
