@@ -91,7 +91,7 @@ function celestial_page() {
             Math.floor(seed.value),
             2);
 
-        download("celestial.svg", svg);
+        download_blob(svg, "celestial.svg", "image/svg+xml");
     }
 
     var png_download = document.getElementById("png_download");
@@ -107,7 +107,7 @@ function celestial_page() {
             Math.floor(seed.value),
             3);
 
-        download("celestial.png", png);
+        download_blob(png, "celestial.png", "image/png");
     }
 
     function render_canvas() {
@@ -124,15 +124,25 @@ function celestial_page() {
     }
 }
 
-function download(filename, data) {
-    var element = document.createElement('a');
-    element.setAttribute('href', data);
-    element.setAttribute('download', filename);
+function download_url(data, fileName) {
+    const a = document.createElement('a')
+    a.href = data
+    a.download = fileName
+    document.body.appendChild(a)
+    a.style.display = 'none'
+    a.click()
+    a.remove()
+}
 
-    element.style.display = 'none';
-    document.body.appendChild(element);
+function download_blob(data, fileName, mimeType) {
 
-    element.click();
+    const blob = new Blob([data], {
+        type: mimeType
+    })
 
-    document.body.removeChild(element);
+    const url = window.URL.createObjectURL(blob)
+
+    download_url(url, fileName)
+
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000)
 }

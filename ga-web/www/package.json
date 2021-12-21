@@ -3,7 +3,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server --mode development"
   },
   "dependencies": {
     "generative-art": "file:../pkg"

@@ -39,6 +39,6 @@ dependencies = ["format", "build-wasm", "build-site"]
 
 [tasks.run]
 description = "Build the site and start a development server."
-dependencies = ["iter-build-flow"]
+dependencies = ["format", "build-wasm"]
 cwd = "www"
 script = "npm run start"

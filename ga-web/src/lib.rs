@@ -13,12 +13,9 @@ use image::{
     codecs::png::PngEncoder,
     png::{CompressionType, FilterType},
 };
+use js_sys::Uint8Array;
 use rand::distributions::Uniform;
 use wasm_bindgen::{prelude::*, JsCast};
-
-// Use `wee_alloc` as the global allocator.
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 pub fn set_panic_hook() {
@@ -38,7 +35,7 @@ pub fn celestial(
     zoom: f32,
     seed: u32,
     render_type: u8,
-) -> Option<String> {
+) -> Option<Uint8Array> {
     let settings = CelestialSketcherSettings {
         object_count,
         render_count,
@@ -60,6 +57,10 @@ pub fn celestial(
 
     canvas.zoom_camera(zoom);
 
+    render(canvas, render_type)
+}
+
+fn render(canvas: VectorCanvas, render_type: u8) -> Option<Uint8Array> {
     match render_type {
         1 => {
             canvas.render::<CanvasRenderer>(CanvasRendererSettings {
@@ -70,22 +71,21 @@ pub fn celestial(
         }
         2 => {
             let svg = canvas.render::<SvgRenderer>(SvgRendererSettings {
-                size: Vec2::splat(600.0),
+                size: Vec2::splat(3000.0),
                 background: Some(Color::black()),
                 ints_only: true,
                 preserve_height: false,
             });
 
-            Some(to_data_uri(svg.as_bytes(), "image/svg+xml"))
+            let output = Uint8Array::new(&JsValue::from_f64(svg.as_bytes().len() as f64));
+            output.copy_from(svg.as_bytes());
+
+            Some(output)
         }
         3 => {
             let mut png = Vec::new();
 
-            let encoder = PngEncoder::new_with_quality(
-                &mut png,
-                CompressionType::Best,
-                FilterType::default(),
-            );
+            let encoder = PngEncoder::new(&mut png);
 
             let image = canvas.render::<SkiaRenderer>(SkiaRendererSettings {
                 size: UVec2::splat(3000),
@@ -103,12 +103,11 @@ pub fn celestial(
                 )
                 .unwrap();
 
-            Some(to_data_uri(&png, "image/png"))
+            let output = Uint8Array::new(&JsValue::from_f64(png.len() as f64));
+            output.copy_from(&png);
+
+            Some(output)
         }
         _ => None,
     }
-}
-
-fn to_data_uri(data: &[u8], file_type: &str) -> String {
-    format!("data:{};base64,{}", file_type, base64::encode(data))
 }

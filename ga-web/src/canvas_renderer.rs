@@ -1,4 +1,4 @@
-use generative_art::denim::{Color, Renderer, Shape, Vec2, LineEnd};
+use generative_art::denim::{Color, LineEnd, Renderer, Shape, Vec2};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::CanvasRenderingContext2d;
 
@@ -22,20 +22,21 @@ impl Renderer for CanvasRenderer {
         let document = web_sys::window().unwrap().document().unwrap();
         let canvas = document.get_element_by_id(&settings.id).unwrap();
 
-        let canvas_size = Vec2::new(canvas
-            .get_attribute("width")
-            .unwrap()
-            .parse::<f32>().unwrap(), canvas
-            .get_attribute("height")
-            .unwrap()
-            .parse::<f32>().unwrap());
+        let canvas_size = Vec2::new(
+            canvas
+                .get_attribute("width")
+                .unwrap()
+                .parse::<f32>()
+                .unwrap(),
+            canvas
+                .get_attribute("height")
+                .unwrap()
+                .parse::<f32>()
+                .unwrap(),
+        );
 
-        let scale = 
-            canvas_size.x
-            / 2.0;
-        let center_offset = canvas_size.y
-            / 2.0
-            / scale;
+        let scale = canvas_size.x / 2.0;
+        let center_offset = canvas_size.y / 2.0 / scale;
 
         let canvas: web_sys::HtmlCanvasElement = canvas
             .dyn_into::<web_sys::HtmlCanvasElement>()
@@ -49,7 +50,7 @@ impl Renderer for CanvasRenderer {
             .dyn_into::<web_sys::CanvasRenderingContext2d>()
             .unwrap();
 
-        if let Some(background) = settings.background{
+        if let Some(background) = settings.background {
             context.set_fill_style(&JsValue::from_str(background.as_hex(false).as_str()));
             context.set_global_alpha(background.a() as f64);
             context.fill_rect(0.0, 0.0, canvas_size.x as f64, canvas_size.y as f64);
@@ -94,9 +95,10 @@ impl Renderer for CanvasRenderer {
                 self.context
                     .set_stroke_style(&JsValue::from_str(&stroke.color.as_hex(false)));
                 self.context.set_global_alpha(stroke.color.a() as f64);
-                self.context.set_line_width(stroke.width as f64 * self.scale as f64);
+                self.context
+                    .set_line_width(stroke.width as f64 * self.scale as f64);
 
-                match stroke.line_end{
+                match stroke.line_end {
                     LineEnd::Butt => self.context.set_line_cap("butt"),
                     LineEnd::Round => self.context.set_line_cap("round"),
                 }
