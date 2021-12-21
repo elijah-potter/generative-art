@@ -32,7 +32,7 @@ npm run build
 dependencies = ["clean-wasm", "clean-site"]
 
 [tasks.full-build-flow]
-dependencies = [ "full-clean-flow", "format", "build-wasm", "build-site"]
+dependencies = ["full-clean-flow", "format", "build-wasm", "build-site"]
 
 [tasks.iter-build-flow]
 dependencies = ["format", "build-wasm", "build-site"]
