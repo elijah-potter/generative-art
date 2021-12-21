@@ -4,47 +4,100 @@
 <head>
   <meta charset="utf-8">
   <title>Generative Art</title>
+  <style>
+    body {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #262626;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    canvas{
+      max-width: 50%;
+    }
+    
+    .left{
+      width: 47.5%
+    }
+    
+    .slider{
+      width: 100%;
+    }
+    
+    button{
+      background-color: #565656;
+      color: white;
+      margin: 5px;
+      padding: 10px 25px;
+      border-radius: 12px;
+      border-color: white;
+    }
+
+    .randomize{
+      padding: 10px 15px;
+    }
+    
+    .svg{
+      background-color: forestgreen;
+    }
+    .png{
+      background-color: tomato;
+    }
+
+
+    </style>
 </head>
 
 <body>
   <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
   <script src="./bootstrap.js"></script>
-
-  <label for="generator">Select a Generator</label>
-  <select id="generator">
-    <option value="celestial">Celestial</option>
-    <option value="waves">Waves</option>
-  </select>
   
-  <br>
+  
+  <div class="left">
+    <h1>Generative Art</h1>
+    <h3>All the generators here run in WebAssembly.</h3>
+    <div>
+      <label for="generator">Select a Generator</label>
+      <select id="generator">
+        <option value="celestial">Celestial</option>
+        <option value="waves">Waves</option>
+      </select>
+    </div>
+    
+    <br>
 
-  <div id="celestial">
-    <label for="object_count">Object Count</label>
-    <input id="object_count" type="range" min="1" max="100" value="3" /><br>
-    <label for="render_count">Render Count</label>
-    <input id="render_count" type="range" min="1" max="3" value="3" /><br>
-    <label for="min_object_size">Minimum Object Mass</label>
-    <input id="min_object_size" type="range" min="1" max="100" /><br>
-    <label for="max_object_size">Maximum Object Mass</label>
-    <input id="max_object_size" type="range" min="1" max="1000" value="100"/><br>
-    <label for="g">G</label>
-    <input id="g" type="range" min="0" max="3" step="0.25"/><br>
-    <label for="steps">Simulation Steps</label>
-    <input id="steps" type="range" min="0" max="10000" value="1000"/><br>
-    <label for="step_length">Simulation Step Length</label>
-    <input id="step_length" type="range" min="0.0001" max="0.01" value="0.01" step="0.000001"/><br>
-    <label for="zoom">Zoom</label>
-    <input id="zoom" type="range" min="0.01" max="2" value="1" step="0.01"/><br>
-    <label for="seed">Seed</label>
-    <input id="seed" type="number"/>
-    <button id="randomize">Randomize Seed</button><br>
-    <button id="svg_download">Download as SVG</button>
-    <button id="png_download">Download as PNG</button>
+    <div id="celestial">
+      <h3>About Celestial</h3>
+      <p>This is a generator based on the movements of celestial bodies.<br>It simulates 2D celestial bodies and graphs their path.</p>
+
+      <label for="object_count">Object Count</label>
+      <input id="object_count" type="range" class="slider" min="1" max="100" value="3" /><br>
+      <label for="render_count">Render Count</label>
+      <input id="render_count" type="range" class="slider" min="1" max="3" value="3" /><br>
+      <label for="min_object_size">Minimum Object Mass</label>
+      <input id="min_object_size" type="range" class="slider" min="1" max="100" /><br>
+      <label for="max_object_size">Maximum Object Mass</label>
+      <input id="max_object_size" type="range" class="slider" min="1" max="1000" value="100" /><br>
+      <label for="g">G</label>
+      <input id="g" type="range" class="slider" min="0" max="3" step="0.01" /><br>
+      <label for="steps">Simulation Steps</label>
+      <input id="steps" type="range" class="slider" min="0" max="10000" value="1000" /><br>
+      <label for="step_length">Simulation Step Length</label>
+      <input id="step_length" type="range" class="slider" min="0.0001" max="0.001" value="0.01" step="0.000001" /><br>
+      <label for="zoom">Zoom</label>
+      <input id="zoom" type="range" class="slider" min="0.01" max="2" value="1" step="0.01" /><br>
+      <label for="seed">Seed</label>
+      <input id="seed" type="number" />
+      <button id="randomize" class="randomize">Randomize Seed</button><br>
+      <button id="svg_download" class="svg">Download as SVG</button>
+      <button id="png_download" class="png">Download as PNG</button>
+    </div>
   </div>
 
-  <br>
-
-  <canvas id="canvas" width="600" height="600">
+  <canvas id="canvas" width="1000" height="1000">
 </body>
 
 </html>
