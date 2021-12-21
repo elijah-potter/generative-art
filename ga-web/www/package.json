@@ -3,9 +3,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "watch": "webpack --watch",
-    "start": "webpack-dev-server",
-    "web": "npm run watch & webpack-dev-server"
+    "start": "webpack-dev-server"
   },
   "dependencies": {
     "generative-art": "file:../pkg"

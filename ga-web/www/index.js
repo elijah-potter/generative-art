@@ -2,43 +2,73 @@ import * as wasm from "generative-art";
 
 wasm.set_panic_hook();
 
-document.getElementById("width").onchange = change;
-document.getElementById("object_count").onchange = change;
-document.getElementById("height").onchange = change;
-document.getElementById("min_object_size").onchange = change;
-document.getElementById("max_object_size").onchange = change;
-document.getElementById("min_object_velocity").onchange = change;
-document.getElementById("max_object_velocity").onchange = change;
-document.getElementById("g").onchange = change;
-document.getElementById("dots").onchange = change;
-document.getElementById("button").onclick = change;
+celestial_page();
 
-document.getElementById("randomize").onclick = randomize_seed;
+function celestial_page() {
+    var render_count = document.getElementById("render_count");
+    render_count.onchange = render;
+    render_count.oninput = render;
 
-change();
+    var object_count = document.getElementById("object_count");
+    object_count.onchange = object_count_change;
+    object_count.oninput = object_count_change;
 
-function randomize_seed() {
-    const seed = Math.floor(Math.random() * (18446744073709551615));
-    document.getElementById("seed").value = seed;
-    console.log("Set seed to: ", seed)
-}
+    function object_count_change() {
+        render_count.max = this.value;
+        render_count.value = this.value;
+        render();
+    }
 
-function change() {
-    let settings = wasm.CelestialSketcherSettings.new();
+    var min_object_size = document.getElementById("min_object_size");
+    min_object_size.onchange = render;
+    min_object_size.oninput = render;
 
-    settings.width = document.getElementById("width").value;
-    settings.height = document.getElementById("height").value;
-    settings.object_count = document.getElementById("object_count").value;
-    settings.render_count = document.getElementById("object_count").value;
-    settings.min_object_size = document.getElementById("height").value;
-    settings.max_object_size = document.getElementById("max_object_size").value;
-    settings.min_object_size = document.getElementById("min_object_size").value;
-    settings.min_object_velocity = document.getElementById("min_object_velocity").value;
-    settings.max_object_velocity = document.getElementById("max_object_velocity").value;
-    settings.g = document.getElementById("g").value;
-    settings.dots = document.getElementById("dots").value;
+    var max_object_size = document.getElementById("max_object_size")
+    max_object_size.onchange = max_object_size_change;
+    max_object_size.oninput = max_object_size_change;
 
-    console.log(settings);
+    function max_object_size_change() {
+        min_object_size.max = this.value;
+        min_object_size.value = Math.min(min_object_size.value, this.value);
+        render();
+    }
 
-    document.getElementById("image").setAttribute("src", wasm.celestial(settings, document.getElementById("seed").value))
+    var g = document.getElementById("g");
+    g.onchange = render;
+    g.oninput = render;
+
+    var steps = document.getElementById("steps");
+    steps.onchange = render;
+    steps.oninput = render;
+
+    var step_length = document.getElementById("step_length");
+    step_length.onchange = render;
+    step_length.oninput = render;
+
+    var zoom = document.getElementById("zoom");
+    zoom.onchange = render;
+    zoom.oninput = render;
+
+    function render() {
+        console.log(
+            object_count.value,
+            render_count.value,
+            min_object_size.value,
+            max_object_size.value,
+            g.value,
+            steps.value,
+            step_length.value,
+            zoom.value);
+
+        wasm.celestial(object_count.value,
+            render_count.value,
+            min_object_size.value,
+            max_object_size.value,
+            g.value,
+            steps.value,
+            step_length.value,
+            zoom.value);
+    }
+
+    render();
 }

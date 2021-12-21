@@ -1,89 +1,13 @@
+mod canvas_renderer;
+
+use canvas_renderer::{CanvasRenderer, CanvasRendererSettings};
 use generative_art::{
-    image::{Pixel, Rgb},
-    CelestialSketcher, Vec2,
+    denim::{Color, Renderer, Stroke, Vec2},
+    sketchers::{CelestialSketcherSettings, Sketcher, CelestialSketcher},
+    OmniCanvas, VectorCanvas, VectorizerStyle,
 };
-use wasm_bindgen::prelude::*;
-
-#[wasm_bindgen]
-// We have do create an adapter so it plays nicely with wasm_bindgen.
-pub struct CelestialSketcherSettings {
-    pub width: f32,
-    pub height: f32,
-    pub object_count: usize,
-    pub min_object_size: f32,
-    pub max_object_size: f32,
-    pub min_object_velocity: f32,
-    pub max_object_velocity: f32,
-    pub g: f32,
-    pub max_radius_from_center: Option<f32>,
-    pub increase_mass_with_distance: bool,
-    pub expected_steps: usize,
-    pub dots: bool,
-    pub render_count: usize,
-    pub step_size: f32,
-}
-
-#[wasm_bindgen]
-impl CelestialSketcherSettings {
-    pub fn new() -> Self {
-        Self {
-            width: 1000.0,
-            height: 1000.0,
-            object_count: 3,
-            min_object_size: 1.0,
-            max_object_size: 100.0,
-            min_object_velocity: 2.0,
-            max_object_velocity: 1000.0,
-            g: 1.0,
-            max_radius_from_center: None,
-            increase_mass_with_distance: false,
-            dots: false,
-            render_count: 3,
-            step_size: 0.005,
-            expected_steps: 10000,
-        }
-    }
-}
-
-impl CelestialSketcherSettings {
-    pub fn as_native(&self) -> generative_art::CelestialSketcherSettings {
-        generative_art::CelestialSketcherSettings {
-            output_size: Vec2::new(self.width, self.height),
-            object_size: self.min_object_size..self.max_object_size,
-            object_count: self.object_count,
-            object_velocity: self.min_object_velocity..self.max_object_velocity,
-            g: self.g,
-            max_radius_from_center: self.max_radius_from_center,
-            increase_mass_with_distance: self.increase_mass_with_distance,
-            expected_steps: self.expected_steps,
-            foreground: Rgb::from_channels(255, 255, 255, 255),
-        }
-    }
-}
-
-#[wasm_bindgen]
-pub fn celestial(settings: CelestialSketcherSettings, seed: u64) -> String {
-    let mut sketcher = CelestialSketcher::new(&settings.as_native(), seed);
-
-    for _i in 0..settings.expected_steps {
-        sketcher.step(settings.step_size);
-    }
-
-    let mut file = Vec::new();
-    generative_art::svg::write(
-        &mut file,
-        &sketcher.render(
-            0..settings.expected_steps,
-            0..settings.render_count,
-            settings.dots,
-        ),
-    ).unwrap();
-
-    to_data_uri(
-        file.as_slice(),
-        "image/svg+xml",
-    )
-}
+use rand::distributions::Uniform;
+use wasm_bindgen::{prelude::*, JsCast};
 
 #[wasm_bindgen]
 pub fn set_panic_hook() {
@@ -97,7 +21,53 @@ pub fn set_panic_hook() {
     console_error_panic_hook::set_once();
 }
 
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
 
-fn to_data_uri(data: &[u8], file_type: &str) -> String {
-    format!("data:{};base64,{}", file_type, base64::encode(data))
+#[wasm_bindgen]
+pub fn celestial(
+    object_count: usize,
+    render_count: usize,
+    min_object_size: f32,
+    max_object_size: f32,
+    g: f32,
+    steps: usize,
+    step_length: f32,
+    zoom: f32
+) {
+    let settings = CelestialSketcherSettings {
+        object_count,
+        render_count,
+        object_position: Uniform::new(-1.0, 1.0),
+        object_size: Uniform::new_inclusive(min_object_size, max_object_size),
+        object_velocity: Uniform::new_inclusive(0.0, 0.0),
+        g,
+        foreground: Color::white(),
+        steps,
+        step_length,
+        render_polygon: None,
+    };
+
+    log("Created settings");
+
+    let sketcher = CelestialSketcher::new(settings, 20);
+
+    log("Created sketcher");
+
+    let mut canvas = sketcher.run_and_dispose(|_| ())
+    .into_vector_canvas(VectorizerStyle::Pixels);  
+    
+    canvas.zoom_camera(zoom);
+
+    log("Ran sketcher");
+
+    canvas.render::<CanvasRenderer>(CanvasRendererSettings {
+        id: "canvas".into(),
+        background: Some(Color::black()),
+    });
+
+    log("Rendered canvas")
 }
