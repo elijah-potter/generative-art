@@ -10,7 +10,15 @@
   <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
   <script src="./bootstrap.js"></script>
 
-  <div>
+  <label for="generator">Select a Generator</label>
+  <select id="generator">
+    <option value="celestial">Celestial</option>
+    <option value="waves">Waves</option>
+  </select>
+  
+  <br>
+
+  <div id="celestial">
     <label for="object_count">Object Count</label>
     <input id="object_count" type="range" min="1" max="100" value="3" /><br>
     <label for="render_count">Render Count</label>
@@ -27,9 +35,16 @@
     <input id="step_length" type="range" min="0.0001" max="0.01" value="0.01" step="0.000001"/><br>
     <label for="zoom">Zoom</label>
     <input id="zoom" type="range" min="0.01" max="2" value="1" step="0.01"/><br>
-
-    <canvas id="canvas" width="600" height="600" />
+    <label for="seed">Seed</label>
+    <input id="seed" type="number"/>
+    <button id="randomize">Randomize Seed</button><br>
+    <button id="svg_download">Download as SVG</button>
+    <button id="png_download">Download as PNG</button>
   </div>
+
+  <br>
+
+  <canvas id="canvas" width="600" height="600">
 </body>
 
 </html>

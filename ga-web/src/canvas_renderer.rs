@@ -73,21 +73,13 @@ impl Renderer for CanvasRenderer {
             self.context.begin_path();
             self.context.move_to(first.x as f64, first.y as f64);
 
-            // Grab second point in case we need to complete a polygon properly.
-            let second = points.next();
-            if let Some(second) = second {
-                self.context.line_to(second.x as f64, second.y as f64);
-            }
-
             for point in points {
                 self.context.line_to(point.x as f64, point.y as f64);
             }
 
             // Fix ends of polygon
             if shape.is_polygon() {
-                let second = second.unwrap();
-
-                self.context.line_to(second.x as f64, second.y as f64);
+                self.context.close_path();
             }
 
             if let Some(fill) = shape.fill {
@@ -98,13 +90,11 @@ impl Renderer for CanvasRenderer {
                 self.context.fill();
             }
 
-            self.context.close_path();
-
             if let Some(stroke) = shape.stroke {
                 self.context
                     .set_stroke_style(&JsValue::from_str(&stroke.color.as_hex(false)));
                 self.context.set_global_alpha(stroke.color.a() as f64);
-                self.context.set_line_width(stroke.width as f64 * 1000.0);
+                self.context.set_line_width(stroke.width as f64 * self.scale as f64);
 
                 match stroke.line_end{
                     LineEnd::Butt => self.context.set_line_cap("butt"),
