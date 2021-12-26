@@ -1,0 +1,54 @@
+[tasks.format]
+description = "Formats the WASM rust code."
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt"]
+
+[tasks.clean-wasm]
+description = "Removes old WASM rust builds."
+script_runner = "@duckscript"
+script = "rm -Rf pkg target Cargo.lock"
+
+[tasks.clean-site]
+description = "Removes old site builds."
+cwd = "www"
+script_runner = "@duckscript"
+script = "rm -Rf dist node_modules package-lock.json"
+
+[tasks.clean-all]
+description = "Cleans all build artifacts."
+dependencies = ["clean-wasm", "clean-site"]
+
+[tasks.build-wasm-debug]
+description = "Builds the WASM for use in debugging."
+install_crate = { crate_name = "wasm-pack", binary = "wasm-pack", test_arg = "--help" }
+command = "wasm-pack"
+args = ["build", "--features", "console_panics"]
+
+[tasks.build-wasm]
+description = "Build the WASM for production."
+install_crate = { crate_name = "wasm-pack", binary = "wasm-pack", test_arg = "--help" }
+command = "wasm-pack"
+args = ["build", "--release"]
+
+[tasks.build-site-debug]
+description = "Build the site for use in debugging."
+dependencies = ["build-wasm-debug", "build-site"]
+
+[tasks.build-site]
+description = "Build the site for production."
+cwd = "www"
+dependencies = ["build-wasm"]
+script = '''
+npm install
+npm run build
+'''
+
+[tasks.run]
+description = "Build the site and start a development server."
+dependencies = ["format", "build-wasm-debug"]
+cwd = "www"
+script = '''
+npm install
+npm run start
+''''

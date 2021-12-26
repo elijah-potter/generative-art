@@ -6,21 +6,19 @@ edition = "2021"
 
 [lib]
 
+[features]
+default = ["thread-rng"]
+small-rng = ["rand/small_rng"]
+thread-rng = ["rand/std", "rand/std_rng"]
+
 [dependencies]
 anyhow = "1.0.45"
-glam = "0.19.0"
-image = { version = "0.23.14", default-features = false, features = [
-    "jpeg",
-    "png",
-    "tiff",
-    "bmp",
-] }
 indicatif = "0.16.2"
-rand = { version = "0.8.4" }
-resvg = "0.19.0"
+rand = { version = "0.8.4", default-features = false }
 structopt = "0.3.25"
-svg = "0.10.0"
-tiny-skia = "0.6.1"
-usvg = "0.19.0"
+denim = { git = "https://github.com/chilipepperhott/denim" }
 
-[features]
+[dependencies.image]
+version = "0.23.14"
+default-features = false
+features = ["jpeg", "png", "bmp"]

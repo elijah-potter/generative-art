@@ -1,14 +1,42 @@
 [package]
 name = "ga-web"
 version = "0.1.0"
+authors = ["Elijah Potter <elijah.sirius@protonmail.com>"]
 edition = "2018"
 
-[dependencies]
-rocket = { version = "0.5.0-rc.1", features = ["json"] }
-generative-art = {path = "../generative-art/"}
-dashmap = "4.0.2"
-blake3 = "1.0.0"
-hex = "0.4.3"
-tokio = { version = "1.12.0", features = ["rt", "time"] }
+[lib]
+crate-type = ["cdylib", "rlib"]
 
 [features]
+default = []
+console_panics = ["console_error_panic_hook"]
+
+[dependencies]
+wasm-bindgen = "0.2.63"
+
+
+generative-art = { path = "../generative-art/", default-features = false, features = [
+    "small-rng",
+] }
+console_error_panic_hook = { version = "0.1.6", optional = true }
+base64 = "0.13.0"
+web-sys = { version = "0.3.55", features = [
+    'CanvasRenderingContext2d',
+    'Document',
+    'Element',
+    'HtmlCanvasElement',
+    'Window',
+] }
+rand = { version = "0.8.4", default-features = false }
+wee_alloc = "0.4.5"
+js-sys = "0.3.55"
+
+[dependencies.image]
+version = "0.23.14"
+default-features = false
+features = ["jpeg", "png", "bmp"]
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1

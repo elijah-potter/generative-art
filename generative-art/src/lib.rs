@@ -1,7 +1,6 @@
-mod celestial;
+mod canvas;
 mod helpers;
-mod preslav;
+pub mod sketchers;
 
-pub use celestial::CelestialSketcher;
-pub use image;
-pub use preslav::PreslavSketcher;
+pub use canvas::{OmniCanvas, RasterCanvas, VectorCanvas, VectorizerStyle};
+pub use denim;

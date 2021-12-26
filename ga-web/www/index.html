@@ -1,152 +1,140 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 
 <head>
-	<meta charset="utf-8">
-	<title>Generative Art</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <title>Generative Art</title>
+  <style>
+    body {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      background-color: #262626;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-	<style>
-		@font-face {
-			font-family: 'main';
-			src: url("/art/font") format('truetype');
-		}
+    canvas {
+      max-width: 50%;
+    }
 
-		body {
-			font-family: 'main';
-			display: flex;
-			align-content: center;
-		}
+    .left {
+      width: 47.5%;
+    }
 
-		.center {
-			text-align: center;
-			display: block;
-			margin-left: auto;
-			margin-right: auto;
-			width: 50%;
-		}
+    .slider {
+      width: 100%;
+    }
 
-		.uploadButton {
-			display: none;
-		}
+    button {
+      background-color: #565656;
+      color: white;
+      margin: 5px;
+      padding: 10px 25px;
+      border-radius: 12px;
+      border-color: white;
+    }
 
-		.uploadLabel {
-			border: 2px solid #000;
-			display: inline-block;
-			padding: 7px 15px;
-			cursor: pointer;
-			border-radius: 5px;
-		}
+    .randomize {
+      padding: 10px 15px;
+    }
 
-		.aboutText {
-			padding: 10px;
-		}
+    .svg {
+      background-color: forestgreen;
+    }
 
-		img {
-			margin-left: auto;
-			margin-right: auto;
-			max-width: 100%
-		}
-
-		.lds-circle {
-			display: inline-block;
-			transform: translateZ(1px);
-		}
-
-		.lds-circle>div {
-			display: inline-block;
-			width: 64px;
-			height: 64px;
-			margin: 8px;
-			border-radius: 50%;
-			background: #000;
-			animation: lds-circle 4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
-		}
-
-		@keyframes lds-circle {
-
-			0%,
-			100% {
-				animation-timing-function: cubic-bezier(0.5, 0, 1, 0.5);
-			}
-
-			0% {
-				transform: rotateY(0deg);
-			}
-
-			50% {
-				transform: rotateY(1800deg);
-				animation-timing-function: cubic-bezier(0, 0.5, 0.5, 1);
-			}
-
-			100% {
-				transform: rotateY(3600deg);
-			}
-		}
-	</style>
+    .png {
+      background-color: tomato;
+    }
+  </style>
 </head>
 
 <body>
-	<div class="center">
-		<h1>Generative Art</h1>
-		<p>Your photo will be uploaded to a server, but not saved.</p>
-		<p>This program works best with large images (more than 2000x2000 pixels).</p>
-		<p>You can find some good photos over on <a href="https://unsplash.com/">Unsplash</a></p>
-		<label class="uploadLabel">
-			<i class="fas fa-file-upload"></i>
-			<input class="uploadButton" type="file" id="upload" accept=".jpg, .jpeg, .png, .pnm, .tiff, .bmp" />
-			Sketch File
-		</label>
-		<div class="lds-circle" id="spinner" style="display: none;">
-			<div></div>
-		</div>
-		<div id="done" style="display: none;">
-			<p class="aboutText">Tap image to download</p>
-			<a id="download" download>
-				<img id="output" />
-			</a>
-		</div>
-	</div>
+  <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
+  <script src="./bootstrap.js"></script>
 
-	<script>
-		function buf2hex(buffer) {
-			return [...new Uint8Array(buffer)]
-				.map(x => x.toString(16).padStart(2, '0'))
-				.join('');
-		}
+  <div class="left">
+    <h1>Generative Art</h1>
+    <h3>All the generators here run in WebAssembly.</h3>
+    <div>
+      <label for="generator">Select a Generator</label>
+      <select id="generator">
+        <option value="celestial">Celestial</option>
+        <option value="waves">Waves</option>
+      </select>
+    </div>
 
-		const upload = document.getElementById('upload');
-		const img = document.getElementById("output");
-		const spinner = document.getElementById("spinner");
-		const done = document.getElementById("done");
-		const download = document.getElementById("download");
+    <br>
 
-		upload.addEventListener('change', (event) => {
-			const fileList = event.target.files;
+    <div id="celestial">
+      <hr>
+      <h3>About Celestial</h3>
+      <p>This is a generator based on the movements of celestial bodies.<br>It simulates 2D celestial bodies and graphs
+        their path.</p>
+      <hr>
 
-			const reader = new FileReader();
-			reader.addEventListener('load', (event) => {
-				console.log("Loaded");
+      <label for="object_count">Object Count</label>
+      <input id="object_count" type="range" class="slider" min="1" max="100" value="3" /><br>
+      <label for="render_count">Render Count</label>
+      <input id="render_count" type="range" class="slider" min="1" max="3" value="3" /><br>
+      <label for="min_object_size">Minimum Object Mass</label>
+      <input id="min_object_size" type="range" class="slider" min="1" max="100" /><br>
+      <label for="max_object_size">Maximum Object Mass</label>
+      <input id="max_object_size" type="range" class="slider" min="1" max="1000" value="100" /><br>
+      <label for="g">G</label>
+      <input id="g" type="range" class="slider" min="0" max="3" step="0.01" /><br>
+      <label for="steps">Simulation Steps</label>
+      <input id="steps" type="range" class="slider" min="0" max="10000" value="1000" /><br>
+      <label for="step_length">Simulation Step Length</label>
+      <input id="step_length" type="range" class="slider" min="0.0001" max="0.001" value="0.01" step="0.000001" /><br>
+      <label for="zoom">Zoom</label>
+      <input id="zoom" type="range" class="slider" min="0.01" max="2" value="1" step="0.01" /><br>
+      <label for="seed">Seed</label>
+      <input id="seed" type="number" />
+      <button id="randomize" class="randomize">Randomize Seed</button><br>
+    </div>
 
-				spinner.style.display = "block";
+    <div id="waves">
+      <hr>
+      <h3>About Waves</h3>
+      <p>
+        This is a generator that transforms an image into a series of Sine functions.<br>
+        It tends to work better for high-contrast images. I recommend using images less than 2000x2000, for performance
+        reasons.<br>
+        <a href="https://squoosh.app/">Squoosh</a> is a great resource for making large images small.
+      </p>
+      <hr>
 
-				fetch('/art/preslav', {
-					method: 'POST',
-					body: event.target.result
-				})
-					.then(response => response.arrayBuffer())
-					.then(ab => {
-						let hex = buf2hex(ab);
-						console.log(hex);
-						img.src = "/art/image/" + hex;
-						download.setAttribute("href", "/art/image/" + hex);
-						spinner.style.display = "none";
-						done.style.display = "block";
-					});
-			});
+      <label for="upload">Base Image</label>
+      <input type="file" id="upload" accept=".jpg, .jpeg, .png, .tiff, .bmp" /><br>
+      <label for="stroke_color">Stroke Color</label>
+      <input id="stroke_color" type="color" /><br>
+      <label for="background_color">Background Color</label>
+      <input id="background_color" type="color" /><br>
+      <label for="stroke_width">Stroke Width</label>
+      <input id="stroke_width" type="range" class="slider" min="0.0001" max="0.05" value="0.01" step="0.0001" /><br>
+      <label for="skip_rows">Skip ___ Rows</label>
+      <input id="skip_rows" type="range" class="slider" min="1" max="200" /><br>
+      <label for="frequency_multiplier">Frequency</label>
+      <input id="frequency_multiplier" type="range" class="slider" min="0.001" max="1" value="0.25" step="0.01" /><br>
+      <label for="amplitude_multiplier">Amplitude</label>
+      <input id="amplitude_multiplier" type="range" class="slider" min="0" max="10" step="0.01" /><br>
+      <!-- <label for="invert_brightness">Invert</label> -->
+      <!-- <input id="invert_brightness" type="range" class="slider" min="0" max="10000" value="1000" /><br> -->
+      <label for="box_blur_radius">Box Blur Radius</label>
+      <input id="box_blur_radius" type="range" class="slider" min="0" max="50" value="0" step="1" /><br>
+      <label for="brightness_threshold">Brightness Threshold</label>
+      <input id="brightness_threshold" type="range" class="slider" min="0" max="1" step="0.001" value="0" /><br>
+      <label for="stroke_with_frequency">Connect Stroke Width with Frequency</label>
+      <input id="stroke_with_frequency" type="checkbox" /><br>
+    </div>
 
-			reader.readAsArrayBuffer(fileList[0]);
-		});
-	</script>
+    <button id="svg_download" class="svg">Download as SVG</button>
+    <button id="png_download" class="png">Download as PNG</button>
+  </div>
+
+  <canvas id="canvas" width="1000" height="1000">
 </body>
+
 </html>
