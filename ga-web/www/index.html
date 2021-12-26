@@ -8,26 +8,26 @@
     body {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       background-color: #262626;
       color: white;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    
-    canvas{
+
+    canvas {
       max-width: 50%;
     }
-    
-    .left{
-      width: 47.5%
+
+    .left {
+      width: 47.5%;
     }
-    
-    .slider{
+
+    .slider {
       width: 100%;
     }
-    
-    button{
+
+    button {
       background-color: #565656;
       color: white;
       margin: 5px;
@@ -36,26 +36,24 @@
       border-color: white;
     }
 
-    .randomize{
+    .randomize {
       padding: 10px 15px;
     }
-    
-    .svg{
+
+    .svg {
       background-color: forestgreen;
     }
-    .png{
+
+    .png {
       background-color: tomato;
     }
-
-
-    </style>
+  </style>
 </head>
 
 <body>
   <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
   <script src="./bootstrap.js"></script>
-  
-  
+
   <div class="left">
     <h1>Generative Art</h1>
     <h3>All the generators here run in WebAssembly.</h3>
@@ -66,12 +64,15 @@
         <option value="waves">Waves</option>
       </select>
     </div>
-    
+
     <br>
 
     <div id="celestial">
+      <hr>
       <h3>About Celestial</h3>
-      <p>This is a generator based on the movements of celestial bodies.<br>It simulates 2D celestial bodies and graphs their path.</p>
+      <p>This is a generator based on the movements of celestial bodies.<br>It simulates 2D celestial bodies and graphs
+        their path.</p>
+      <hr>
 
       <label for="object_count">Object Count</label>
       <input id="object_count" type="range" class="slider" min="1" max="100" value="3" /><br>
@@ -92,9 +93,45 @@
       <label for="seed">Seed</label>
       <input id="seed" type="number" />
       <button id="randomize" class="randomize">Randomize Seed</button><br>
-      <button id="svg_download" class="svg">Download as SVG</button>
-      <button id="png_download" class="png">Download as PNG</button>
     </div>
+
+    <div id="waves">
+      <hr>
+      <h3>About Waves</h3>
+      <p>
+        This is a generator that transforms an image into a series of Sine functions.<br>
+        It tends to work better for high-contrast images. I recommend using images less than 2000x2000, for performance
+        reasons.<br>
+        <a href="https://squoosh.app/">Squoosh</a> is a great resource for making large images small.
+      </p>
+      <hr>
+
+      <label for="upload">Base Image</label>
+      <input type="file" id="upload" accept=".jpg, .jpeg, .png, .tiff, .bmp" /><br>
+      <label for="stroke_color">Stroke Color</label>
+      <input id="stroke_color" type="color" /><br>
+      <label for="background_color">Background Color</label>
+      <input id="background_color" type="color" /><br>
+      <label for="stroke_width">Stroke Width</label>
+      <input id="stroke_width" type="range" class="slider" min="0.0001" max="0.05" value="0.01" step="0.0001" /><br>
+      <label for="skip_rows">Skip ___ Rows</label>
+      <input id="skip_rows" type="range" class="slider" min="1" max="200" /><br>
+      <label for="frequency_multiplier">Frequency</label>
+      <input id="frequency_multiplier" type="range" class="slider" min="0.001" max="1" value="0.25" step="0.01" /><br>
+      <label for="amplitude_multiplier">Amplitude</label>
+      <input id="amplitude_multiplier" type="range" class="slider" min="0" max="10" step="0.01" /><br>
+      <!-- <label for="invert_brightness">Invert</label> -->
+      <!-- <input id="invert_brightness" type="range" class="slider" min="0" max="10000" value="1000" /><br> -->
+      <label for="box_blur_radius">Box Blur Radius</label>
+      <input id="box_blur_radius" type="range" class="slider" min="0" max="50" value="0" step="1" /><br>
+      <label for="brightness_threshold">Brightness Threshold</label>
+      <input id="brightness_threshold" type="range" class="slider" min="0" max="1" step="0.001" value="0" /><br>
+      <label for="stroke_with_frequency">Connect Stroke Width with Frequency</label>
+      <input id="stroke_with_frequency" type="checkbox" /><br>
+    </div>
+
+    <button id="svg_download" class="svg">Download as SVG</button>
+    <button id="png_download" class="png">Download as PNG</button>
   </div>
 
   <canvas id="canvas" width="1000" height="1000">

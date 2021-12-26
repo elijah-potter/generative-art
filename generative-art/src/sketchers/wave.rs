@@ -56,14 +56,19 @@ impl WaveSketcher {
 
             // TODO: Add option to randomize phase
             let mut a = 0.0;
-
             let mut line_points = Vec::new();
 
-            for x in 0..self.input_image.width() {
+            for column in 0..self.input_image.width() {
                 let mut blurred_brightness = 0.0;
 
-                if self.settings.box_blur_radius > 0 {
-                    for x in x - self.settings.box_blur_radius..x + self.settings.box_blur_radius {
+                if self.settings.box_blur_radius == 0 {
+                    let pixel = self.input_image.get_pixel(column, row);
+
+                    blurred_brightness = (pixel.r() + pixel.g() + pixel.b()) * pixel.a() / 3.0;
+                } else {
+                    for x in column - self.settings.box_blur_radius
+                        ..column + self.settings.box_blur_radius
+                    {
                         for y in
                             row - self.settings.box_blur_radius..row + self.settings.box_blur_radius
                         {
@@ -74,16 +79,12 @@ impl WaveSketcher {
                         }
                     }
 
-                    let box_diameter = self.settings.box_blur_radius as f32 * 2.0;
+                    let k = self.settings.box_blur_radius as f32 * 2.0;
 
-                    blurred_brightness /= box_diameter * box_diameter;
-                } else {
-                    let pixel = self.input_image.get_pixel(x, row);
-
-                    blurred_brightness = (pixel.r() + pixel.g() + pixel.b()) * pixel.a() / 3.0;
+                    blurred_brightness /= k * k;
                 }
 
-                if blurred_brightness > self.settings.brightness_threshold {
+                if blurred_brightness >= self.settings.brightness_threshold {
                     let delta_a = blurred_brightness * self.settings.frequency_multiplier;
 
                     a += delta_a;
@@ -92,7 +93,7 @@ impl WaveSketcher {
                     let y = a.sin() * self.settings.amplitude_multiplier;
 
                     // TODO: Clean this up.
-                    let p = (Vec2::new(x as f32 * aspect_ratio, y + row as f32) * pixel_scale
+                    let p = (Vec2::new(column as f32 * aspect_ratio, y + row as f32) * pixel_scale
                         - Vec2::new(aspect_ratio, 1.0))
                         * Vec2::new(1.0, -1.0);
 
@@ -134,7 +135,6 @@ where
     P: Fn(f32),
 {
     fn run(&mut self, before_iter: P) -> OmniCanvas {
-        // TODO: Add progress bar
         self.run(before_iter);
 
         self.canvas.clone().into()
