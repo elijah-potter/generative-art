@@ -1,5 +1,5 @@
 use generative_art::denim::{Color, LineEnd, Renderer, Shape, Vec2};
-use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use web_sys::CanvasRenderingContext2d;
 
 pub struct CanvasRendererSettings {
@@ -11,6 +11,16 @@ pub struct CanvasRenderer {
     context: CanvasRenderingContext2d,
     scale: f32,
     center_offset: f32,
+    current_fill_color: Color,
+    current_stroke_color: Color,
+    current_alpha: f32,
+    current_line_width: f32,
+}
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
 }
 
 impl Renderer for CanvasRenderer {
@@ -56,10 +66,19 @@ impl Renderer for CanvasRenderer {
             context.fill_rect(0.0, 0.0, canvas_size.x as f64, canvas_size.y as f64);
         }
 
+        context.set_fill_style(&JsValue::from_str(&Color::white().as_hex(false)));
+        context.set_stroke_style(&JsValue::from_str(&Color::white().as_hex(false)));
+        context.set_global_alpha(1.0);
+        context.set_line_width(1.0);
+
         Self {
             context,
             scale,
             center_offset,
+            current_fill_color: Color::white(),
+            current_stroke_color: Color::white(),
+            current_alpha: 1.0,
+            current_line_width: 1.0,
         }
     }
 
@@ -72,10 +91,13 @@ impl Renderer for CanvasRenderer {
 
         if let Some(first) = points.next() {
             self.context.begin_path();
-            self.context.move_to(first.x as f64, first.y as f64);
+
+            self.context
+                .move_to(first.x.round() as f64, first.y.round() as f64);
 
             for point in points {
-                self.context.line_to(point.x as f64, point.y as f64);
+                self.context
+                    .line_to(point.x.round() as f64, point.y.round() as f64);
             }
 
             // Fix ends of polygon
@@ -84,24 +106,37 @@ impl Renderer for CanvasRenderer {
             }
 
             if let Some(fill) = shape.fill {
-                self.context
-                    .set_fill_style(&JsValue::from_str(&fill.as_hex(false)));
-                self.context.set_global_alpha(fill.a() as f64);
+                if self.current_fill_color != fill {
+                    self.context
+                        .set_fill_style(&JsValue::from_str(&fill.as_hex(false)));
+                }
+
+                if fill.a() != self.current_alpha {
+                    self.context.set_global_alpha(fill.a() as f64);
+                    self.current_alpha = fill.a();
+                }
 
                 self.context.fill();
             }
 
             if let Some(stroke) = shape.stroke {
-                self.context
-                    .set_stroke_style(&JsValue::from_str(&stroke.color.as_hex(false)));
-                self.context.set_global_alpha(stroke.color.a() as f64);
-                self.context
-                    .set_line_width(stroke.width as f64 * self.scale as f64);
-
-                match stroke.line_end {
-                    LineEnd::Butt => self.context.set_line_cap("butt"),
-                    LineEnd::Round => self.context.set_line_cap("round"),
+                if self.current_stroke_color != stroke.color {
+                    self.context
+                        .set_stroke_style(&JsValue::from_str(&stroke.color.as_hex(false)));
                 }
+
+                if stroke.color.a() != self.current_alpha {
+                    self.context.set_global_alpha(stroke.color.a() as f64);
+                    self.current_alpha = stroke.color.a();
+                }
+
+                if self.current_line_width != stroke.width {
+                    self.context
+                        .set_line_width(stroke.width as f64 * self.scale as f64);
+                    self.current_line_width = stroke.width;
+                }
+
+                // We don't set the line end for performance reasons.
 
                 self.context.stroke();
             }
