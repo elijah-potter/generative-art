@@ -1,26 +1,22 @@
 mod canvas_renderer;
 
-use std::{rc::Rc, sync::Mutex};
-
 use canvas_renderer::{CanvasRenderer, CanvasRendererSettings};
 use generative_art::{
     denim::{
         renderers::{SkiaRenderer, SkiaRendererSettings, SvgRenderer, SvgRendererSettings},
-        Color, LineEnd, Renderer, Stroke, UVec2, Vec2,
+        Color, LineEnd, Stroke, UVec2,
     },
     sketchers::{
         CelestialSketcher, CelestialSketcherSettings, Sketcher, WaveSketcher, WaveSketcherSettings,
-    },
-    OmniCanvas, RasterCanvas, VectorCanvas, VectorizerStyle,
+    }, RasterCanvas, VectorCanvas, VectorizerStyle,
 };
 use image::{
     codecs::png::PngEncoder,
-    png::{CompressionType, FilterType},
     ImageFormat,
 };
 use js_sys::Uint8Array;
 use rand::distributions::Uniform;
-use wasm_bindgen::{prelude::*, JsCast};
+use wasm_bindgen::{prelude::*};
 
 #[wasm_bindgen]
 pub fn set_panic_hook() {
@@ -96,6 +92,7 @@ pub fn waves(
     background_color: &str,
     stroke_width: f32,
     skip_rows: usize,
+    skip_columns: usize,
     frequency_multiplier: f32,
     amplitude_multiplier: f32,
     invert_brightness: bool,
@@ -111,6 +108,7 @@ pub fn waves(
             line_end: LineEnd::Round,
         },
         skip_rows,
+        skip_columns,
         frequency_multiplier,
         amplitude_multiplier,
         invert_brightness,
@@ -128,7 +126,7 @@ pub fn waves(
 
     let sketcher = WaveSketcher::new(image, settings);
 
-    let mut canvas = sketcher
+    let canvas = sketcher
         .run_and_dispose(|_| ())
         .into_vector_canvas(VectorizerStyle::Pixels);
 

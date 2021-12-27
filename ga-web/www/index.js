@@ -177,6 +177,9 @@ function waves_page() {
     var stroke_with_frequency = document.getElementById("stroke_with_frequency");
     stroke_with_frequency.onchange = render_canvas;
 
+    var lowres_viewport = document.getElementById("lowres_viewport");
+    lowres_viewport.onchange = render_canvas;
+
     var svg_download = document.getElementById("svg_download");
     svg_download.onclick = function () {
         var svg = wasm.waves(
@@ -184,6 +187,7 @@ function waves_page() {
             background_color.value,
             stroke_width.value,
             skip_rows.value,
+            0,
             frequency_multiplier.value * frequency_multiplier.value,
             amplitude_multiplier.value,
             false,
@@ -203,6 +207,7 @@ function waves_page() {
             background_color.value,
             stroke_width.value,
             skip_rows.value,
+            0,
             frequency_multiplier.value * frequency_multiplier.value,
             amplitude_multiplier.value,
             false,
@@ -217,12 +222,12 @@ function waves_page() {
 
     function render_canvas() {
         if (image != null) {
-            console.log(stroke_with_frequency.checked);
             wasm.waves(
                 stroke_color.value,
                 background_color.value,
                 stroke_width.value,
                 skip_rows.value,
+                lowres_viewport.checked ? 10 : 0,
                 frequency_multiplier.value * frequency_multiplier.value,
                 amplitude_multiplier.value,
                 false,

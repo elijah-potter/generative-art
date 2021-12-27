@@ -102,7 +102,9 @@
         This is a generator that transforms an image into a series of Sine functions.<br>
         It tends to work better for high-contrast images. I recommend using images less than 2000x2000, for performance
         reasons.<br>
-        <a href="https://squoosh.app/">Squoosh</a> is a great resource for making large images small.
+        <a href="https://squoosh.app/">Squoosh</a> is a great resource for making large images small.<br>
+
+        To get started, load an image. It will never leave your device.<br>
       </p>
       <hr>
 
@@ -120,15 +122,17 @@
       <input id="frequency_multiplier" type="range" class="slider" min="0.001" max="1" value="0.25" step="0.01" /><br>
       <label for="amplitude_multiplier">Amplitude</label>
       <input id="amplitude_multiplier" type="range" class="slider" min="0" max="10" step="0.01" /><br>
-      <!-- <label for="invert_brightness">Invert</label> -->
-      <!-- <input id="invert_brightness" type="range" class="slider" min="0" max="10000" value="1000" /><br> -->
       <label for="box_blur_radius">Box Blur Radius</label>
       <input id="box_blur_radius" type="range" class="slider" min="0" max="50" value="0" step="1" /><br>
       <label for="brightness_threshold">Brightness Threshold</label>
       <input id="brightness_threshold" type="range" class="slider" min="0" max="1" step="0.001" value="0" /><br>
       <label for="stroke_with_frequency">Connect Stroke Width with Frequency</label>
       <input id="stroke_with_frequency" type="checkbox" /><br>
+      <label for="lowres_viewport">Low Res Viewport</label>
+      <input id="lowres_viewport" type="checkbox" checked="true"/><br>
     </div>
+
+    <br>
 
     <button id="svg_download" class="svg">Download as SVG</button>
     <button id="png_download" class="png">Download as PNG</button>

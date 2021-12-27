@@ -7,21 +7,23 @@ use super::Sketcher;
 
 #[derive(Clone)]
 pub struct WaveSketcherSettings {
-    /// What stroke to create the lines with
+    /// What stroke to create the lines with.
     pub stroke: Stroke,
-    /// Only draw every __ rows of pixels
+    /// Only draw every __ rows of pixels.
     pub skip_rows: usize,
+    /// Only draw every __ columns of pixels.
+    pub skip_columns: usize,
     /// Adjust the frequency of the lines.
     pub frequency_multiplier: f32,
     /// Adjust the amplitude of the lines.
     pub amplitude_multiplier: f32,
-    /// Invert color so that dark areas have higher frequency
+    /// Invert color so that dark areas have higher frequency.
     pub invert_brightness: bool,
-    /// Set a brightness threshold under which, no lines are drawn. This is effected by [invert_brightness](Self::invert_brightness)
+    /// Set a brightness threshold under which, no lines are drawn. This is effected by [invert_brightness](Self::invert_brightness).
     pub brightness_threshold: f32,
     /// Radius of a box blur applied to the input image. For no box blur, set this to zero.
     pub box_blur_radius: usize,
-    /// Modulate stroke with frequency
+    /// Modulate stroke with frequency.
     pub stroke_with_frequency: bool,
 }
 
@@ -58,7 +60,8 @@ impl WaveSketcher {
             let mut a = 0.0;
             let mut line_points = Vec::new();
 
-            for column in 0..self.input_image.width() {
+            let  mut column = 0;
+            while column < self.input_image.width() {
                 let mut blurred_brightness = 0.0;
 
                 if self.settings.box_blur_radius == 0 {
@@ -87,7 +90,7 @@ impl WaveSketcher {
                 if blurred_brightness >= self.settings.brightness_threshold {
                     let delta_a = blurred_brightness * self.settings.frequency_multiplier;
 
-                    a += delta_a;
+                    a += delta_a * (self.settings.skip_columns as f32 + 1.0);
                     a %= 2.0 * PI;
 
                     let y = a.sin() * self.settings.amplitude_multiplier;
@@ -118,6 +121,8 @@ impl WaveSketcher {
                 } else if !line_points.is_empty() {
                     line_points = Vec::new();
                 }
+
+                column += 1 + self.settings.skip_columns;
             }
 
             if line_points.len() >= 2 {

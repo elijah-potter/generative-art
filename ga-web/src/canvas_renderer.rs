@@ -15,6 +15,7 @@ pub struct CanvasRenderer {
     current_stroke_color: Color,
     current_alpha: f32,
     current_line_width: f32,
+    current_line_end: LineEnd,
 }
 
 #[wasm_bindgen]
@@ -70,6 +71,7 @@ impl Renderer for CanvasRenderer {
         context.set_stroke_style(&JsValue::from_str(&Color::white().as_hex(false)));
         context.set_global_alpha(1.0);
         context.set_line_width(1.0);
+        context.set_line_cap("butt");
 
         Self {
             context,
@@ -79,6 +81,7 @@ impl Renderer for CanvasRenderer {
             current_stroke_color: Color::white(),
             current_alpha: 1.0,
             current_line_width: 1.0,
+            current_line_end: LineEnd::Butt,
         }
     }
 
@@ -136,7 +139,12 @@ impl Renderer for CanvasRenderer {
                     self.current_line_width = stroke.width;
                 }
 
-                // We don't set the line end for performance reasons.
+                if self.current_line_end != stroke.line_end {
+                    match stroke.line_end {
+                        LineEnd::Butt => self.context.set_line_cap("butt"),
+                        LineEnd::Round => self.context.set_line_cap("round"),
+                    }
+                }
 
                 self.context.stroke();
             }
