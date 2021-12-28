@@ -95,12 +95,10 @@ impl Renderer for CanvasRenderer {
         if let Some(first) = points.next() {
             self.context.begin_path();
 
-            self.context
-                .move_to(first.x.round() as f64, first.y.round() as f64);
+            self.context.move_to(first.x as f64, first.y as f64);
 
             for point in points {
-                self.context
-                    .line_to(point.x.round() as f64, point.y.round() as f64);
+                self.context.line_to(point.x as f64, point.y as f64);
             }
 
             // Fix ends of polygon

@@ -8,15 +8,13 @@ use generative_art::{
     },
     sketchers::{
         CelestialSketcher, CelestialSketcherSettings, Sketcher, WaveSketcher, WaveSketcherSettings,
-    }, RasterCanvas, VectorCanvas, VectorizerStyle,
+    },
+    RasterCanvas, VectorCanvas, VectorizerStyle,
 };
-use image::{
-    codecs::png::PngEncoder,
-    ImageFormat,
-};
+use image::{codecs::png::PngEncoder, ImageFormat};
 use js_sys::Uint8Array;
 use rand::distributions::Uniform;
-use wasm_bindgen::{prelude::*};
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn set_panic_hook() {
@@ -27,7 +25,7 @@ pub fn set_panic_hook() {
 static mut LOADED_IMAGE: Option<RasterCanvas> = None;
 
 #[wasm_bindgen]
-pub fn load_image(image: &[u8], file_ext: &str) {
+pub fn load_image(image: &[u8], file_ext: &str) -> usize {
     let image_format = match file_ext {
         "jpg" | "jpeg" => ImageFormat::Jpeg,
         "png" => ImageFormat::Png,
@@ -39,9 +37,13 @@ pub fn load_image(image: &[u8], file_ext: &str) {
     let image = image::load_from_memory_with_format(image, image_format).unwrap();
     let image = RasterCanvas::from_rgba(&image.to_rgba8());
 
+    let image_width = image.width();
+
     unsafe {
         LOADED_IMAGE = Some(image);
     }
+
+    image_width
 }
 
 #[wasm_bindgen]

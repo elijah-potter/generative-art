@@ -131,6 +131,7 @@ function celestial_page() {
 function waves_page() {
     var image = null;
     var filename = null;
+    var image_width = null;
     
     var upload = document.getElementById("upload");
     upload.addEventListener('change', (event) => {
@@ -141,7 +142,7 @@ function waves_page() {
             console.log("Loaded file");
             image = new Uint8Array(event.target.result);
             filename = upload.value.split(/(\\|\/)/g).pop().split('.').pop();
-            wasm.load_image(image,filename);
+            image_width = wasm.load_image(image,filename);
             render_canvas();
         });
 
@@ -227,7 +228,7 @@ function waves_page() {
                 background_color.value,
                 stroke_width.value,
                 skip_rows.value,
-                lowres_viewport.checked ? 10 : 0,
+                lowres_viewport.checked ? image_width / 500 : image_width / 1000,
                 frequency_multiplier.value * frequency_multiplier.value,
                 amplitude_multiplier.value,
                 false,
