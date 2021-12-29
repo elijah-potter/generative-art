@@ -60,7 +60,7 @@ impl WaveSketcher {
             let mut a = 0.0;
             let mut line_points = Vec::new();
 
-            let  mut column = 0;
+            let mut column = 0;
             while column < self.input_image.width() {
                 let mut blurred_brightness = 0.0;
 
@@ -96,6 +96,7 @@ impl WaveSketcher {
                     let y = a.sin() * self.settings.amplitude_multiplier;
 
                     // TODO: Clean this up.
+                    // Transform from input image pixel coordinates to canvas coordinates
                     let p = (Vec2::new(column as f32 * aspect_ratio, y + row as f32) * pixel_scale
                         - Vec2::new(aspect_ratio, 1.0))
                         * Vec2::new(1.0, -1.0);

@@ -62,6 +62,7 @@
       <select id="generator">
         <option value="celestial">Celestial</option>
         <option value="waves">Waves</option>
+        <option value="preslav">Preslav</option>
       </select>
     </div>
 
@@ -90,9 +91,9 @@
       <input id="step_length" type="range" class="slider" min="0.0001" max="0.001" value="0.01" step="0.000001" /><br>
       <label for="zoom">Zoom</label>
       <input id="zoom" type="range" class="slider" min="0.01" max="2" value="1" step="0.01" /><br>
-      <label for="seed">Seed</label>
-      <input id="seed" type="number" />
-      <button id="randomize" class="randomize">Randomize Seed</button><br>
+      <label for="seed_celestial">Seed</label>
+      <input id="seed_celestial" type="number" />
+      <button id="randomize_celestial" class="randomize">Randomize Seed</button><br>
     </div>
 
     <div id="waves">
@@ -107,8 +108,8 @@
       </p>
       <hr>
 
-      <label for="upload">Base Image</label>
-      <input type="file" id="upload" accept=".jpg, .jpeg, .png, .tiff, .bmp" /><br>
+      <label for="upload_waves">Base Image</label>
+      <input type="file" id="upload_waves" accept=".jpg, .jpeg, .png, .tiff, .bmp" /><br>
       <label for="stroke_color">Stroke Color</label>
       <input id="stroke_color" type="color" /><br>
       <label for="background_color">Background Color</label>
@@ -129,6 +130,40 @@
       <input id="stroke_with_frequency" type="checkbox" /><br>
       <label for="lowres_viewport">Low Res Viewport</label>
       <input id="lowres_viewport" type="checkbox" checked="true"/><br>
+    </div>
+
+    <div id="preslav">
+      <hr>
+      <h3>About Preslav</h3>
+      <p>
+        This generator comes from Preslav Rachev's book Generative Art in Go<br>
+        To get started, load an image. It will never leave your device.<br>
+      </p>
+      <hr>
+
+      <label for="upload_preslav">Base Image</label>
+      <input type="file" id="upload_preslav" accept=".jpg, .jpeg, .png, .tiff, .bmp" /><br>
+      <label for="stroke_jitter">Stroke Jitter</label>
+      <input id="stroke_jitter" type="range" class="slider" min="0.0001" max="1.0" value="0.1" step="0.0001" /><br>
+      <label for="stroke_inversion_threshold">Stroke Inversion Threshold</label>
+      <input id="stroke_inversion_threshold" type="range" class="slider" min="0.0001" max="0.2" value="0.05" step="0.0001" /><br>
+      <label for="alpha">Initial Alpha</label>
+      <input id="alpha" type="range" class="slider" min="0.0001" max="1.0" value="0.1" step="0.0001" /><br>
+      <label for="alpha_increase">Alpha Increase</label>
+      <input id="alpha_increase" type="range" class="slider" min="0.0001" max="0.1" value="0.06" step="0.0001" /><br>
+      <label for="min_edge_count">Minimum Polygon Sides</label>
+      <input id="min_edge_count" type="range" class="slider" min="3" max="10" value="3" /><br>
+      <label for="max_edge_count">Maximum Polygon Sides</label>
+      <input id="max_edge_count" type="range" class="slider" min="3" max="10" value="8" /><br>
+      <label for="stroke_size">Initial Stroke Size</label>
+      <input id="stroke_size" type="range" class="slider" min="0.0001" max="1" value="0.6" step="0.0001" /><br>
+      <label for="stroke_reduction">Stroke Reduction</label>
+      <input id="stroke_reduction" type="range" class="slider" min="0" max="0.1" value="0.01" step="0.0001" /><br>
+      <label for="shapes">Shapes</label>
+      <input id="shapes" type="range" class="slider" min="0" max="10000" value="5000" /><br>
+      <label for="seed_preslav">Seed</label>
+      <input id="seed_preslav" type="number" />
+      <button id="randomize_preslav" class="randomize">Randomize Seed</button><br>
     </div>
 
     <br>

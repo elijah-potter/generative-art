@@ -7,7 +7,8 @@ use generative_art::{
         Color, LineEnd, Stroke, UVec2,
     },
     sketchers::{
-        CelestialSketcher, CelestialSketcherSettings, Sketcher, WaveSketcher, WaveSketcherSettings,
+        CelestialSketcher, CelestialSketcherSettings, PreslavSketcher, PreslavSketcherSettings,
+        Sketcher, WaveSketcher, WaveSketcherSettings,
     },
     RasterCanvas, VectorCanvas, VectorizerStyle,
 };
@@ -138,6 +139,47 @@ pub fn waves(
         size,
         render_type,
     )
+}
+
+#[wasm_bindgen]
+pub fn preslav(
+    stroke_jitter: f32,
+    stroke_inversion_threshold: f32,
+    alpha: f32,
+    alpha_increase: f32,
+    min_edge_count: usize,
+    max_edge_count: usize,
+    stroke_size: f32,
+    stroke_reduction: f32,
+    shapes: usize,
+    seed: u32,
+    render_type: u8,
+) -> Option<Uint8Array> {
+    let settings = PreslavSketcherSettings {
+        stroke_jitter,
+        stroke_inversion_threshold,
+        alpha,
+        alpha_increase,
+        edge_count: Uniform::new_inclusive(min_edge_count, max_edge_count),
+        stroke_size,
+        stroke_reduction,
+        shapes,
+    };
+
+    let image = unsafe { LOADED_IMAGE.clone().unwrap() };
+
+    let size = UVec2::new(
+        (image.width() as f32 / image.height() as f32 * 3000.0) as u32,
+        3000,
+    );
+
+    let sketcher = PreslavSketcher::new(image, settings, seed as u64);
+
+    let canvas = sketcher
+        .run_and_dispose(|_| ())
+        .into_vector_canvas(VectorizerStyle::Pixels);
+
+    render(canvas, Some(Color::white()), size, render_type)
 }
 
 fn render(

@@ -1,10 +1,12 @@
 mod celestial;
 mod fragment;
 mod wave;
+mod preslav;
 
 pub use celestial::{CelestialSketcher, CelestialSketcherSettings};
 pub use fragment::{RasterFragmentSketcher, VectorFragmentSketcher};
 pub use wave::{WaveSketcher, WaveSketcherSettings};
+pub use preslav::{PreslavSketcher, PreslavSketcherSettings};
 
 use crate::canvas::OmniCanvas;
 

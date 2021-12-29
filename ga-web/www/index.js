@@ -7,10 +7,16 @@ selector.onchange = select_generator;
 
 var celestial_group = document.getElementById("celestial");
 var waves_group = document.getElementById("waves");
+var preslav_group = document.getElementById("preslav");
+
+var image = null;
+var filename = null;
+var image_width = null;
 
 function select_generator() {
     celestial_group.style.display = "none";
     waves_group.style.display = "none";
+    preslav_group.style.display = "none";
 
     switch (selector.value) {
         case "celestial":
@@ -20,6 +26,10 @@ function select_generator() {
         case "waves":
             waves_group.style.display = "initial";
             waves_page();
+            break;
+        case "preslav":
+            preslav_group.style.display = "initial";
+            preslav_page();
             break;
     }
 }
@@ -71,11 +81,11 @@ function celestial_page() {
     zoom.onchange = render_canvas;
     zoom.oninput = render_canvas;
 
-    var seed = document.getElementById("seed");
+    var seed = document.getElementById("seed_celestial");
     seed.onchange = render_canvas;
     seed.oninput = render_canvas;
 
-    var randomize = document.getElementById("randomize");
+    var randomize = document.getElementById("randomize_celestial");
     randomize.onclick = function () {
         seed.value = Math.floor(Math.random() * 10000000);
         render_canvas();
@@ -129,11 +139,7 @@ function celestial_page() {
 }
 
 function waves_page() {
-    var image = null;
-    var filename = null;
-    var image_width = null;
-    
-    var upload = document.getElementById("upload");
+    var upload = document.getElementById("upload_waves");
     upload.addEventListener('change', (event) => {
         const file_list = event.target.files;
 
@@ -142,7 +148,7 @@ function waves_page() {
             console.log("Loaded file");
             image = new Uint8Array(event.target.result);
             filename = upload.value.split(/(\\|\/)/g).pop().split('.').pop();
-            image_width = wasm.load_image(image,filename);
+            image_width = wasm.load_image(image, filename);
             render_canvas();
         });
 
@@ -183,43 +189,48 @@ function waves_page() {
 
     var svg_download = document.getElementById("svg_download");
     svg_download.onclick = function () {
-        var svg = wasm.waves(
-            stroke_color.value,
-            background_color.value,
-            stroke_width.value,
-            skip_rows.value,
-            0,
-            frequency_multiplier.value * frequency_multiplier.value,
-            amplitude_multiplier.value,
-            false,
-            brightness_threshold.value,
-            box_blur_radius.value,
-            stroke_with_frequency.checked,
-            2
-        );
+        if (image != null) {
 
-        download_blob(svg, "waves.svg", "image/svg+xml");
+            var svg = wasm.waves(
+                stroke_color.value,
+                background_color.value,
+                stroke_width.value,
+                skip_rows.value,
+                0,
+                frequency_multiplier.value * frequency_multiplier.value,
+                amplitude_multiplier.value,
+                false,
+                brightness_threshold.value,
+                box_blur_radius.value,
+                stroke_with_frequency.checked,
+                2
+            );
+            download_blob(svg, "waves.svg", "image/svg+xml");
+        }
     }
 
     var png_download = document.getElementById("png_download");
     png_download.onclick = function () {
-        var png = wasm.waves(
-            stroke_color.value,
-            background_color.value,
-            stroke_width.value,
-            skip_rows.value,
-            0,
-            frequency_multiplier.value * frequency_multiplier.value,
-            amplitude_multiplier.value,
-            false,
-            brightness_threshold.value,
-            box_blur_radius.value,
-            stroke_with_frequency.checked,
-            3
-        );
-
-        download_blob(png, "waves.png", "image/png");
+        if (image != null) {
+            var png = wasm.waves(
+                stroke_color.value,
+                background_color.value,
+                stroke_width.value,
+                skip_rows.value,
+                0,
+                frequency_multiplier.value * frequency_multiplier.value,
+                amplitude_multiplier.value,
+                false,
+                brightness_threshold.value,
+                box_blur_radius.value,
+                stroke_with_frequency.checked,
+                3
+            );
+            download_blob(png, "waves.png", "image/png");
+        }
     }
+
+    render_canvas();
 
     function render_canvas() {
         if (image != null) {
@@ -237,6 +248,120 @@ function waves_page() {
                 stroke_with_frequency.checked,
                 1
             );
+        }
+    }
+}
+
+function preslav_page() {
+    var upload = document.getElementById("upload_preslav");
+    upload.addEventListener('change', (event) => {
+        const file_list = event.target.files;
+
+        const reader = new FileReader();
+        reader.addEventListener('load', (event) => {
+            console.log("Loaded file");
+            image = new Uint8Array(event.target.result);
+            filename = upload.value.split(/(\\|\/)/g).pop().split('.').pop();
+            image_width = wasm.load_image(image, filename);
+            render_canvas();
+        });
+
+        reader.readAsArrayBuffer(file_list[0]);
+    });
+
+    var stroke_jitter = document.getElementById("stroke_jitter");
+    stroke_jitter.onchange = render_canvas;
+
+    var stroke_inversion_threshold = document.getElementById("stroke_inversion_threshold");
+    stroke_inversion_threshold.onchange = render_canvas;
+
+    var alpha = document.getElementById("alpha");
+    alpha.onchange = render_canvas;
+
+    var alpha_increase = document.getElementById("alpha_increase");
+    alpha_increase.onchange = render_canvas;
+
+    var min_edge_count = document.getElementById("min_edge_count");
+    min_edge_count.onchange = render_canvas;
+
+    var max_edge_count = document.getElementById("max_edge_count");
+    max_edge_count.onchange = render_canvas;
+
+    var stroke_size = document.getElementById("stroke_size");
+    stroke_size.onchange = render_canvas;
+
+    var stroke_reduction = document.getElementById("stroke_reduction");
+    stroke_reduction.onchange = render_canvas;
+
+    var shapes = document.getElementById("shapes");
+    shapes.onchange = render_canvas;
+
+    var seed = document.getElementById("seed_preslav");
+    seed.onchange = render_canvas;
+
+    var randomize = document.getElementById("randomize_preslav");
+    randomize.onclick = function () {
+        seed.value = Math.floor(Math.random() * 10000000);
+        render_canvas();
+    }
+    randomize.onclick();
+
+    var svg_download = document.getElementById("svg_download");
+    svg_download.onclick = function () {
+        if (image != null) {
+            var svg = wasm.preslav(
+                stroke_jitter.value,
+                stroke_inversion_threshold.value,
+                alpha.value,
+                alpha_increase.value,
+                min_edge_count.value,
+                max_edge_count.value,
+                stroke_size.value,
+                stroke_reduction.value,
+                shapes.value,
+                seed.value,
+                2
+            );
+
+            download_blob(svg, "waves.svg", "image/svg+xml");
+        }
+    }
+
+    var png_download = document.getElementById("png_download");
+    png_download.onclick = function () {
+        if (image != null) {
+            var png = wasm.preslav(
+                stroke_jitter.value,
+                stroke_inversion_threshold.value,
+                alpha.value,
+                alpha_increase.value,
+                min_edge_count.value,
+                max_edge_count.value,
+                stroke_size.value,
+                stroke_reduction.value,
+                shapes.value,
+                seed.value,
+                3
+            );
+            download_blob(png, "waves.png", "image/png");
+        }
+    }
+
+    function render_canvas() {
+        if (image != null) {
+            wasm.preslav(
+                stroke_jitter.value,
+                stroke_inversion_threshold.value,
+                alpha.value,
+                alpha_increase.value,
+                min_edge_count.value,
+                max_edge_count.value,
+                stroke_size.value,
+                stroke_reduction.value,
+                shapes.value,
+                seed.value,
+                1
+            )
         }
     }
 }
