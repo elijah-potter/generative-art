@@ -131,7 +131,7 @@ where
         );
 
         self.settings.stroke_size -= self.settings.stroke_reduction * self.settings.stroke_size;
-        self.settings.alpha += self.settings.alpha_increase;
+        self.settings.alpha += self.settings.alpha_increase / self.settings.alpha;
     }
 
     /// Runs entire sketcher
