@@ -13,7 +13,6 @@ pub struct CanvasRenderer {
     center_offset: f32,
     current_fill_color: Color,
     current_stroke_color: Color,
-    current_alpha: f32,
     current_line_width: f32,
     current_line_end: LineEnd,
 }
@@ -69,7 +68,6 @@ impl Renderer for CanvasRenderer {
 
         context.set_fill_style(&JsValue::from_str(&Color::white().as_hex(false)));
         context.set_stroke_style(&JsValue::from_str(&Color::white().as_hex(false)));
-        context.set_global_alpha(1.0);
         context.set_line_width(1.0);
         context.set_line_cap("butt");
 
@@ -79,7 +77,6 @@ impl Renderer for CanvasRenderer {
             center_offset,
             current_fill_color: Color::white(),
             current_stroke_color: Color::white(),
-            current_alpha: 1.0,
             current_line_width: 1.0,
             current_line_end: LineEnd::Butt,
         }
@@ -109,12 +106,7 @@ impl Renderer for CanvasRenderer {
             if let Some(fill) = shape.fill {
                 if self.current_fill_color != fill {
                     self.context
-                        .set_fill_style(&JsValue::from_str(&fill.as_hex(false)));
-                }
-
-                if fill.a() != self.current_alpha {
-                    self.context.set_global_alpha(fill.a() as f64);
-                    self.current_alpha = fill.a();
+                        .set_fill_style(&JsValue::from_str(&fill.as_hex(true)));
                 }
 
                 self.context.fill();
@@ -123,12 +115,7 @@ impl Renderer for CanvasRenderer {
             if let Some(stroke) = shape.stroke {
                 if self.current_stroke_color != stroke.color {
                     self.context
-                        .set_stroke_style(&JsValue::from_str(&stroke.color.as_hex(false)));
-                }
-
-                if stroke.color.a() != self.current_alpha {
-                    self.context.set_global_alpha(stroke.color.a() as f64);
-                    self.current_alpha = stroke.color.a();
+                        .set_stroke_style(&JsValue::from_str(&stroke.color.as_hex(true)));
                 }
 
                 if self.current_line_width != stroke.width {
