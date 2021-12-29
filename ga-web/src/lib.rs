@@ -151,6 +151,7 @@ pub fn preslav(
     max_edge_count: usize,
     stroke_size: f32,
     stroke_reduction: f32,
+    randomize_rotation: f32,
     shapes: usize,
     seed: u32,
     render_type: u8,
@@ -163,6 +164,7 @@ pub fn preslav(
         edge_count: Uniform::new_inclusive(min_edge_count, max_edge_count),
         stroke_size,
         stroke_reduction,
+        randomize_rotation,
         shapes,
     };
 

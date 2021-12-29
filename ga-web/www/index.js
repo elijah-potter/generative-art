@@ -281,17 +281,26 @@ function preslav_page() {
     var alpha_increase = document.getElementById("alpha_increase");
     alpha_increase.onchange = render_canvas;
 
-    var min_edge_count = document.getElementById("min_edge_count");
-    min_edge_count.onchange = render_canvas;
-
     var max_edge_count = document.getElementById("max_edge_count");
     max_edge_count.onchange = render_canvas;
-
+    
+    var min_edge_count = document.getElementById("min_edge_count");
+    min_edge_count.onchange = function() {
+        if (this.value > max_edge_count.value){
+            this.value = max_edge_count.value;
+        }
+        
+        render_canvas();
+    };
+    
     var stroke_size = document.getElementById("stroke_size");
     stroke_size.onchange = render_canvas;
 
     var stroke_reduction = document.getElementById("stroke_reduction");
     stroke_reduction.onchange = render_canvas;
+
+    var randomize_rotation = document.getElementById("randomize_rotation")
+    randomize_rotation.onchange = render_canvas;
 
     var shapes = document.getElementById("shapes");
     shapes.onchange = render_canvas;
@@ -318,6 +327,7 @@ function preslav_page() {
                 max_edge_count.value,
                 stroke_size.value,
                 stroke_reduction.value,
+                randomize_rotation.value,
                 shapes.value,
                 seed.value,
                 2
@@ -339,6 +349,7 @@ function preslav_page() {
                 max_edge_count.value,
                 stroke_size.value,
                 stroke_reduction.value,
+                randomize_rotation.value,
                 shapes.value,
                 seed.value,
                 3
@@ -358,6 +369,7 @@ function preslav_page() {
                 max_edge_count.value,
                 stroke_size.value,
                 stroke_reduction.value,
+                randomize_rotation.value,
                 shapes.value,
                 seed.value,
                 1

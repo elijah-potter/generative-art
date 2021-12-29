@@ -29,6 +29,8 @@ where
     pub stroke_size: f32,
     /// How much smaller the stroke should become each time one is drawn.
     pub stroke_reduction: f32,
+    /// Randomize rotation multiplier
+    pub randomize_rotation: f32,
     /// The number of shapes to render.
     pub shapes: usize,
 }
@@ -125,7 +127,7 @@ where
             d,
             edge_count,
             self.settings.stroke_size,
-            rng.gen(),
+            rng.gen::<f32>() * self.settings.randomize_rotation,
             edge_color,
             Some(color),
         );
