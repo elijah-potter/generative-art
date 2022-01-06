@@ -8,6 +8,7 @@ selector.onchange = select_generator;
 var celestial_group = document.getElementById("celestial");
 var waves_group = document.getElementById("waves");
 var preslav_group = document.getElementById("preslav");
+var halftone_group = document.getElementById("halftone");
 
 var image = null;
 var filename = null;
@@ -17,6 +18,7 @@ function select_generator() {
     celestial_group.style.display = "none";
     waves_group.style.display = "none";
     preslav_group.style.display = "none";
+    halftone_group.style.display = "none";
 
     switch (selector.value) {
         case "celestial":
@@ -30,6 +32,10 @@ function select_generator() {
         case "preslav":
             preslav_group.style.display = "initial";
             preslav_page();
+            break;
+        case "halftone":
+            halftone_group.style.display = "initial";
+            halftone_page();
             break;
     }
 }
@@ -333,7 +339,7 @@ function preslav_page() {
                 2
             );
 
-            download_blob(svg, "waves.svg", "image/svg+xml");
+            download_blob(svg, "preslav.svg", "image/svg+xml");
         }
     }
 
@@ -354,7 +360,7 @@ function preslav_page() {
                 seed.value,
                 3
             );
-            download_blob(png, "waves.png", "image/png");
+            download_blob(png, "preslav.png", "image/png");
         }
     }
 
@@ -372,6 +378,74 @@ function preslav_page() {
                 randomize_rotation.value,
                 shapes.value,
                 seed.value,
+                1
+            )
+        }
+    }
+}
+
+function halftone_page() {
+    var upload = document.getElementById("upload_halftone");
+    upload.addEventListener('change', (event) => {
+        const file_list = event.target.files;
+
+        const reader = new FileReader();
+        reader.addEventListener('load', (event) => {
+            console.log("Loaded file");
+            image = new Uint8Array(event.target.result);
+            filename = upload.value.split(/(\\|\/)/g).pop().split('.').pop();
+            image_width = wasm.load_image(image, filename);
+            render_canvas();
+        });
+
+        reader.readAsArrayBuffer(file_list[0]);
+    });
+
+    var dot_density = document.getElementById("dot_density");
+    dot_density.onchange = render_canvas;
+
+    var dot_scale = document.getElementById("dot_scale");
+    dot_scale.onchange = render_canvas;
+
+    var dot_sides = document.getElementById("dot_sides");
+    dot_sides.onchange = render_canvas;
+
+    var svg_download = document.getElementById("svg_download");
+    svg_download.onclick = function () {
+        if (image != null) {
+            var svg = wasmhalftone(
+                dot_density.value,
+                dot_scale.value,
+                dot_sides.value,
+                "#000000",
+                2
+            );
+
+            download_blob(svg, "halftone.svg", "image/svg+xml");
+        }
+    }
+
+    var png_download = document.getElementById("png_download");
+    png_download.onclick = function () {
+        if (image != null) {
+            var png = wasm.halftone(
+                dot_density.value,
+                dot_scale.value,
+                dot_sides.value,
+                "#000000",
+                3
+            );
+            download_blob(png, "halftone.png", "image/png");
+        }
+    }
+
+    function render_canvas() {
+        if (image != null) {
+            wasm.halftone(
+                dot_density.value,
+                dot_scale.value,
+                dot_sides.value,
+                "#000000",
                 1
             )
         }

@@ -64,6 +64,7 @@
         <option value="celestial">Celestial</option>
         <option value="waves">Waves</option>
         <option value="preslav">Preslav</option>
+        <option value="halftone">Halftone</option>
       </select>
     </div>
 
@@ -167,6 +168,24 @@
       <label for="seed_preslav">Seed</label>
       <input id="seed_preslav" type="number" />
       <button id="randomize_preslav" class="randomize">Randomize Seed</button><br>
+    </div>
+
+    <div id="halftone">
+      <hr>
+      <h3>About Halftone</h3>
+      <p>
+        Placeholder text
+      </p>
+      <hr>
+
+      <label for="upload_halftone">Base Image</label>
+      <input type="file" id="upload_halftone" accept=".jpg, .jpeg, .png, .tiff, .bmp" /><br>
+      <label for="dot_density">Dot Density</label>
+      <input id="dot_density" type="range" class="slider" min="1" max="300.0" value="50" /><br>
+      <label for="dot_scale">Dot Size</label>
+      <input id="dot_scale" type="range" class="slider" min="0.0001" max="2" value="1" step="0.001" /><br>
+      <label for="dot_sides">Dot Sides</label>
+      <input id="dot_sides" type="range" class="slider" min="3" max="16" value="16" /><br>
     </div>
 
     <br>

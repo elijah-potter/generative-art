@@ -1,4 +1,4 @@
-use denim::{Color, LineEnd, Stroke, Vec2};
+use denim::{Color, LineEnd, Mat2, Stroke, Vec2};
 
 use rand::{prelude::Distribution, Rng};
 #[cfg(feature = "small-rng")]
@@ -41,8 +41,8 @@ where
     E: Distribution<usize> + Clone,
 {
     settings: PreslavSketcherSettings<E>,
-    aspect_ratio: f32,
-    pixel_scale: Vec2,
+    half_size: Vec2,
+    scale_mat: Mat2,
     input_image: RasterCanvas,
     canvas: VectorCanvas,
     #[cfg(feature = "small-rng")]
@@ -57,13 +57,15 @@ where
         input_image: RasterCanvas,
         settings: PreslavSketcherSettings<E>,
         #[cfg(feature = "small-rng")] seed: u64,
-    ) -> Self {
+    ) -> Self {        
+        let major_dimension = usize::min(input_image.width(), input_image.height()) as f32;
+
         Self {
             settings,
-            aspect_ratio: input_image.width() as f32 / input_image.height() as f32,
-            pixel_scale: Vec2::new(
-                2.0 / input_image.width() as f32,
-                2.0 / input_image.height() as f32,
+            half_size: Vec2::new(input_image.width() as f32, input_image.height() as f32) / 2.0,
+            scale_mat: Mat2::from_cols(
+                Vec2::X * (2.0 / major_dimension),
+                Vec2::Y * (-2.0 / major_dimension),
             ),
             input_image,
             canvas: VectorCanvas::new(),
@@ -84,8 +86,10 @@ where
         #[cfg(feature = "small-rng")]
         let mut rng = &mut self.rng;
 
-        let x = rng.gen_range(0.0..(self.input_image.width() as f32));
-        let y = rng.gen_range(0.0..(self.input_image.height() as f32));
+        let p = Vec2::new(
+            rng.gen_range(0.0..(self.input_image.width() as f32)),
+            rng.gen_range(0.0..(self.input_image.height() as f32)),
+        );
 
         let jitter = Vec2::new(
             rng.gen_range(-self.settings.stroke_jitter..self.settings.stroke_jitter),
@@ -94,18 +98,13 @@ where
 
         // TODO: Clean this up.
         // Transform from input image pixel coordinates to canvas coordinates, then apply jitter.
-        let d = (Vec2::new(x * self.aspect_ratio, y) * self.pixel_scale
-            - Vec2::new(self.aspect_ratio, 1.0))
-            * Vec2::new(1.0, -1.0)
-            + jitter;
+        let d = self.scale_mat.mul_vec2(p - self.half_size) + jitter;
 
         let edge_count = (&self.settings.edge_count).sample(&mut rng);
-        let mut color: Color = self.input_image.get_pixel(x as usize, y as usize);
+        let mut color: Color = self.input_image.get_pixel(p.x as usize, p.y as usize);
         *color.a_mut() = self.settings.alpha;
 
-        let edge_color = if self.settings.stroke_size
-            <= self.settings.stroke_inversion_threshold
-        {
+        let edge_color = if self.settings.stroke_size <= self.settings.stroke_inversion_threshold {
             if color.r() + color.g() + color.b() / 3.0 < 0.5 {
                 Some(Stroke {
                     color: Color::new(1.0, 1.0, 1.0, self.settings.alpha * 2.0),

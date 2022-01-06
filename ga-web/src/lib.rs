@@ -7,8 +7,8 @@ use generative_art::{
         Color, LineEnd, Stroke, UVec2,
     },
     sketchers::{
-        CelestialSketcher, CelestialSketcherSettings, PreslavSketcher, PreslavSketcherSettings,
-        Sketcher, WaveSketcher, WaveSketcherSettings,
+        CelestialSketcher, CelestialSketcherSettings, HalftoneSketcher, HalftoneSketcherSettings,
+        PreslavSketcher, PreslavSketcherSettings, Sketcher, WaveSketcher, WaveSketcherSettings,
     },
     RasterCanvas, VectorCanvas, VectorizerStyle,
 };
@@ -184,6 +184,37 @@ pub fn preslav(
     render(canvas, Some(Color::white()), size, render_type)
 }
 
+#[wasm_bindgen]
+pub fn halftone(
+    dot_density: f32,
+    dot_scale: f32,
+    dot_sides: u32,
+    dot_color: &str,
+    render_type: u8,
+) -> Option<Uint8Array> {
+    let settings = HalftoneSketcherSettings {
+        dot_density,
+        dot_scale,
+        dot_sides: dot_sides as usize,
+        dot_color: Color::from_hex(&dot_color).unwrap(),
+    };
+
+    let image = unsafe { LOADED_IMAGE.clone().unwrap() };
+
+    let size = UVec2::new(
+        (image.width() as f32 / image.height() as f32 * 3000.0) as u32,
+        3000,
+    );
+
+    let sketcher = HalftoneSketcher::new(image, settings);
+
+    let canvas = sketcher
+        .run_and_dispose(|_| ())
+        .into_vector_canvas(VectorizerStyle::Pixels);
+
+    render(canvas, Some(Color::white()), size, render_type)
+}
+
 fn render(
     canvas: VectorCanvas,
     background_color: Option<Color>,
@@ -204,6 +235,7 @@ fn render(
                 background: background_color,
                 ints_only: false,
                 preserve_height: true,
+                circle_vertex_threshold: 16,
             });
 
             let output = Uint8Array::new(&JsValue::from_f64(svg.as_bytes().len() as f64));

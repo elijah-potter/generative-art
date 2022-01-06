@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use crate::canvas::{OmniCanvas, RasterCanvas, VectorCanvas};
-use denim::{Stroke, Vec2};
+use denim::{Stroke, Vec2, Mat2};
 
 use super::Sketcher;
 
@@ -43,12 +43,16 @@ impl WaveSketcher {
     }
 
     fn run<P: Fn(f32)>(&mut self, before_iter: P) {
-        // Scale a pixel to fit within canvas bounds of -1..1.
-        let aspect_ratio = self.input_image.width() as f32 / self.input_image.height() as f32;
+        let major_dimension = usize::min(self.input_image.width(), self.input_image.height()) as f32;
 
-        let pixel_scale = Vec2::new(
-            2.0 / self.input_image.width() as f32,
-            2.0 / self.input_image.height() as f32,
+        let half_size = Vec2::new(
+            self.input_image.width() as f32,
+            self.input_image.height() as f32,
+        ) / 2.0;
+
+        let scale_mat = Mat2::from_cols(
+            Vec2::X * (2.0 / self.input_image.width() as f32),
+            Vec2::Y * (-2.0 / self.input_image.width() as f32),
         );
 
         // Create a line for each row of pixels, skipping the necessary number.
@@ -95,11 +99,7 @@ impl WaveSketcher {
 
                     let y = a.sin() * self.settings.amplitude_multiplier;
 
-                    // TODO: Clean this up.
-                    // Transform from input image pixel coordinates to canvas coordinates
-                    let p = (Vec2::new(column as f32 * aspect_ratio, y + row as f32) * pixel_scale
-                        - Vec2::new(aspect_ratio, 1.0))
-                        * Vec2::new(1.0, -1.0);
+                    let p = scale_mat.mul_vec2(Vec2::new(column as f32, y + row as f32) - half_size);
 
                     line_points.push(p);
 

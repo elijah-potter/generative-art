@@ -37,9 +37,10 @@ impl OmniCanvas {
         resolution: UVec2,
         anti_alias: bool,
         background_color: Option<Color>,
+        preserve_height: bool
     ) -> RasterCanvas {
         self.clone()
-            .into_raster_canvas(resolution, anti_alias, background_color)
+            .into_raster_canvas(resolution, anti_alias, background_color, preserve_height)
     }
 
     /// Consume the [OmniCanvas] and return a [VectorCanvas].
@@ -83,6 +84,7 @@ impl OmniCanvas {
         resolution: UVec2,
         antialias: bool,
         background_color: Option<Color>,
+        preserve_height: bool,
     ) -> RasterCanvas {
         match self {
             OmniCanvas::VectorCanvas { inner } => {
@@ -90,7 +92,7 @@ impl OmniCanvas {
                     size: resolution,
                     background: background_color,
                     antialias,
-                    preserve_height: false,
+                    preserve_height,
                 }))
             }
             OmniCanvas::RasterCanvas { inner } => inner,
@@ -110,13 +112,14 @@ impl OmniCanvas {
         path: T,
         size: Vec2,
         background_color: Option<Color>,
+        preserve_height: bool
     ) -> io::Result<()> {
         let path = path.into();
 
         match path.extension().map(|v| v.to_str().unwrap()) {
             Some("bmp") | Some("png") | Some("jpg") | Some("tiff") => {
                 if let Err(err) = self
-                    .as_raster_canvas(size.as_uvec2(), true, background_color)
+                    .as_raster_canvas(size.as_uvec2(), true, background_color, preserve_height)
                     .as_rgba()
                     .save(path)
                 {
@@ -131,7 +134,8 @@ impl OmniCanvas {
                             size,
                             background: background_color,
                             ints_only: false,
-                            preserve_height: false,
+                            preserve_height,
+                            circle_vertex_threshold: 12,
                         }),
                 )?;
             }
