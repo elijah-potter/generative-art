@@ -1,9 +1,9 @@
 mod canvas_renderer;
 
-use canvas_renderer::{CanvasRenderer, CanvasRendererSettings};
+use canvas_renderer::CanvasRenderer;
 use generative_art::{
-    denim::{
-        renderers::{SkiaRenderer, SkiaRendererSettings, SvgRenderer, SvgRendererSettings},
+    barium::{
+        renderers::{SkiaRenderer, SvgRenderer},
         Color, LineEnd, Stroke, UVec2,
     },
     sketchers::{
@@ -223,20 +223,17 @@ fn render(
 ) -> Option<Uint8Array> {
     match render_type {
         1 => {
-            canvas.render::<CanvasRenderer>(CanvasRendererSettings {
-                id: "canvas".into(),
-                background: background_color,
-            });
+            canvas.render::<CanvasRenderer>(CanvasRenderer::new("canvas".into(), background_color));
             None
         }
         2 => {
-            let svg = canvas.render::<SvgRenderer>(SvgRendererSettings {
-                size: size.as_vec2(),
-                background: background_color,
-                ints_only: false,
-                preserve_height: true,
-                circle_vertex_threshold: 16,
-            });
+            let svg = canvas.render::<SvgRenderer>(SvgRenderer::new(
+                size.as_vec2(),
+                background_color,
+                false,
+                true,
+                16,
+            ));
 
             let output = Uint8Array::new(&JsValue::from_f64(svg.as_bytes().len() as f64));
             output.copy_from(svg.as_bytes());
@@ -248,12 +245,12 @@ fn render(
 
             let encoder = PngEncoder::new(&mut png);
 
-            let image = canvas.render::<SkiaRenderer>(SkiaRendererSettings {
+            let image = canvas.render::<SkiaRenderer>(SkiaRenderer::new(
                 size,
-                background: background_color,
-                antialias: true,
-                preserve_height: true,
-            });
+                background_color,
+                true,
+                true,
+            ));
 
             encoder
                 .encode(

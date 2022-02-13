@@ -1,11 +1,6 @@
-use generative_art::denim::{Color, LineEnd, Renderer, Shape, Vec2};
+use generative_art::barium::{Color, LineEnd, Renderer, Shape, Vec2};
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use web_sys::CanvasRenderingContext2d;
-
-pub struct CanvasRendererSettings {
-    pub id: String,
-    pub background: Option<Color>,
-}
 
 pub struct CanvasRenderer {
     context: CanvasRenderingContext2d,
@@ -23,14 +18,10 @@ extern "C" {
     fn log(s: &str);
 }
 
-impl Renderer for CanvasRenderer {
-    type Settings = CanvasRendererSettings;
-
-    type Output = ();
-
-    fn new(settings: Self::Settings) -> Self {
+impl CanvasRenderer {
+    pub fn new(id: &str, background: Option<Color>) -> Self {
         let document = web_sys::window().unwrap().document().unwrap();
-        let canvas = document.get_element_by_id(&settings.id).unwrap();
+        let canvas = document.get_element_by_id(id).unwrap();
 
         let canvas_size = Vec2::new(
             canvas
@@ -60,7 +51,7 @@ impl Renderer for CanvasRenderer {
             .dyn_into::<web_sys::CanvasRenderingContext2d>()
             .unwrap();
 
-        if let Some(background) = settings.background {
+        if let Some(background) = background {
             context.set_fill_style(&JsValue::from_str(background.as_hex(false).as_str()));
             context.set_global_alpha(background.a() as f64);
             context.fill_rect(0.0, 0.0, canvas_size.x as f64, canvas_size.y as f64);
@@ -81,6 +72,10 @@ impl Renderer for CanvasRenderer {
             current_line_end: LineEnd::Butt,
         }
     }
+}
+
+impl Renderer for CanvasRenderer {
+    type Output = ();
 
     fn render(&mut self, shape: &Shape) {
         // Transform from Camera Space (range from (-1, -1) to (1, 1)) to Image Space (range from (0, 0) to (1000, 1000)).

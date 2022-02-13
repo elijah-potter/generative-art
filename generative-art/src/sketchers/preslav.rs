@@ -1,4 +1,4 @@
-use denim::{Color, LineEnd, Mat2, Stroke, Vec2};
+use barium::{Color, LineEnd, Mat2, Stroke, Vec2};
 
 use rand::{prelude::Distribution, Rng};
 #[cfg(feature = "small-rng")]
@@ -57,7 +57,7 @@ where
         input_image: RasterCanvas,
         settings: PreslavSketcherSettings<E>,
         #[cfg(feature = "small-rng")] seed: u64,
-    ) -> Self {        
+    ) -> Self {
         let major_dimension = usize::min(input_image.width(), input_image.height()) as f32;
 
         Self {
@@ -68,7 +68,7 @@ where
                 Vec2::Y * (-2.0 / major_dimension),
             ),
             input_image,
-            canvas: VectorCanvas::new(),
+            canvas: VectorCanvas::default(),
             #[cfg(feature = "small-rng")]
             rng: SmallRng::seed_from_u64(seed),
         }
@@ -142,6 +142,8 @@ where
 
             self.draw_shape();
         }
+
+        let mut shapes = self.canvas.as_raw().to_vec();
     }
 }
 

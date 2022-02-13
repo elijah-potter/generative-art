@@ -16,7 +16,7 @@ anyhow = "1.0.45"
 indicatif = "0.16.2"
 rand = { version = "0.8.4", default-features = false }
 structopt = "0.3.25"
-denim = { git = "https://github.com/chilipepperhott/denim" }
+barium = { git = "https://github.com/chilipepperhott/barium" }
 
 [dependencies.image]
 version = "0.23.14"

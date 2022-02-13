@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use crate::canvas::{OmniCanvas, RasterCanvas, VectorCanvas};
-use denim::{Stroke, Vec2, Mat2};
+use barium::{Stroke, Vec2, Mat2};
 
 use super::Sketcher;
 
@@ -38,7 +38,7 @@ impl WaveSketcher {
         Self {
             settings,
             input_image,
-            canvas: VectorCanvas::new(),
+            canvas: VectorCanvas::default(),
         }
     }
 

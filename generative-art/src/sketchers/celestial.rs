@@ -6,7 +6,7 @@ use rand::{rngs::SmallRng, SeedableRng};
 
 use crate::canvas::{OmniCanvas, VectorCanvas};
 use crate::sketchers::Sketcher;
-use denim::{Color, LineEnd, Stroke, Vec2};
+use barium::{Color, LineEnd, Stroke, Vec2};
 
 #[derive(Clone)]
 pub struct CelestialSketcherSettings<P, S, V>
@@ -95,7 +95,7 @@ impl CelestialSketcher {
             steps: settings.steps,
             step_length: settings.step_length,
             render_polygon: settings.render_polygon,
-            canvas: VectorCanvas::new(),
+            canvas: VectorCanvas::default(),
         }
     }
 
@@ -121,7 +121,7 @@ impl CelestialSketcher {
 
     /// Renders the path of a given number of objects.
     fn render(&mut self) {
-        self.canvas = VectorCanvas::new();
+        self.canvas = VectorCanvas::default();
 
         if let Some(sides) = self.render_polygon {
             for i in 0..self.objects[0].path.len() {

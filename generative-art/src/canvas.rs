@@ -1,13 +1,13 @@
 use std::{fs, io, path::PathBuf};
 
-use denim::{
-    renderers::{SkiaRenderer, SkiaRendererSettings, SvgRenderer, SvgRendererSettings},
+use barium::{
+    renderers::{SkiaRenderer, SvgRenderer},
     Color, RgbaImage, UVec2, Vec2,
 };
 
 /// Which algorithm to use when vectorizing a [RasterCanvas].
 pub enum VectorizerStyle {
-    /// Converts the [RasterCanvas] by creating [Squares](denim::canvas::CanvasElementVariant::Polygon) at each pixel's location, with the appropriate color.
+    /// Converts the [RasterCanvas] by creating [Squares](barium::canvas::CanvasElementVariant::Polygon) at each pixel's location, with the appropriate color.
     Pixels,
 }
 
@@ -29,7 +29,7 @@ impl OmniCanvas {
 
     /// Use the OmniCanvas as a [RasterCanvas].
     ///
-    /// If the OmniCanvas is a [VectorCanvas], it does conversion using [SkiaRenderer](denim::renderers::skia_renderer::SkiaRenderer).
+    /// If the OmniCanvas is a [VectorCanvas], it does conversion using [SkiaRenderer](barium::renderers::skia_renderer::SkiaRenderer).
     ///
     /// Be warned: this operation is expensive if the [OmniCanvas] is [RasterCanvas](OmniCanvas::RasterCanvas).
     pub fn as_raster_canvas(
@@ -45,14 +45,14 @@ impl OmniCanvas {
 
     /// Consume the [OmniCanvas] and return a [VectorCanvas].
     ///
-    /// If the OmniCanvas is a [RasterCanvas], it does conversion using [SkiaRenderer](denim::renderers::skia_renderer::SkiaRenderer).
+    /// If the OmniCanvas is a [RasterCanvas], it does conversion using [SkiaRenderer](barium::renderers::skia_renderer::SkiaRenderer).
     ///
     /// Be warned: this operation is expensive if the [OmniCanvas] is [VectorCanvas](OmniCanvas::VectorCanvas).
     pub fn into_vector_canvas(self, style: VectorizerStyle) -> VectorCanvas {
         match self {
             OmniCanvas::VectorCanvas { inner } => inner,
             OmniCanvas::RasterCanvas { mut inner } => {
-                let mut vector = VectorCanvas::new();
+                let mut vector = VectorCanvas::default();
                 match style {
                     VectorizerStyle::Pixels => {
                         let width = inner.width();
@@ -78,7 +78,7 @@ impl OmniCanvas {
 
     /// Consume the [OmniCanvas] and return a [RasterCanvas].
     ///
-    /// If the OmniCanvas is a [VectorCanvas], it does conversion using [SkiaRenderer](denim::renderers::skia_renderer::SkiaRenderer).
+    /// If the OmniCanvas is a [VectorCanvas], it does conversion using [SkiaRenderer](barium::renderers::skia_renderer::SkiaRenderer).
     pub fn into_raster_canvas(
         self,
         resolution: UVec2,
@@ -88,12 +88,12 @@ impl OmniCanvas {
     ) -> RasterCanvas {
         match self {
             OmniCanvas::VectorCanvas { inner } => {
-                RasterCanvas::from_rgba(&inner.render::<SkiaRenderer>(SkiaRendererSettings {
-                    size: resolution,
-                    background: background_color,
+                RasterCanvas::from_rgba(&inner.render(SkiaRenderer::new(
+                    resolution,
+                    background_color,
                     antialias,
                     preserve_height,
-                }))
+                )))
             }
             OmniCanvas::RasterCanvas { inner } => inner,
         }
@@ -130,13 +130,13 @@ impl OmniCanvas {
                 fs::write(
                     path,
                     self.as_vector_canvas(VectorizerStyle::Pixels)
-                        .render::<SvgRenderer>(SvgRendererSettings {
+                        .render::<SvgRenderer>(SvgRenderer::new(
                             size,
-                            background: background_color,
-                            ints_only: false,
+                            background_color,
+                            false,
                             preserve_height,
-                            circle_vertex_threshold: 12,
-                        }),
+                            12,
+                        )),
                 )?;
             }
             _ => {
@@ -164,7 +164,7 @@ impl From<RasterCanvas> for OmniCanvas {
     }
 }
 
-pub type VectorCanvas = denim::Canvas;
+pub type VectorCanvas = barium::Canvas;
 
 #[derive(Clone)]
 pub struct RasterCanvas {

@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use denim::{Color, Mat2, UVec2, Vec2};
+use barium::{Color, Mat2, UVec2, Vec2};
 
 use crate::canvas::{OmniCanvas, RasterCanvas, VectorCanvas};
 
@@ -25,7 +25,7 @@ impl HalftoneSketcher {
         Self {
             settings,
             input_image,
-            canvas: VectorCanvas::new(),
+            canvas: VectorCanvas::default(),
         }
     }
 

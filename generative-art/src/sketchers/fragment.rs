@@ -1,4 +1,4 @@
-use denim::{Color, Shape};
+use barium::{Color, Shape};
 
 use crate::canvas::{OmniCanvas, RasterCanvas, VectorCanvas};
 
