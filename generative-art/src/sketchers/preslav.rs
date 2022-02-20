@@ -133,6 +133,7 @@ where
 
         self.settings.stroke_size -= self.settings.stroke_reduction * self.settings.stroke_size;
         self.settings.alpha += self.settings.alpha_increase / self.settings.alpha;
+        self.settings.alpha = self.settings.alpha.clamp(0.0, 1.0);
     }
 
     /// Runs entire sketcher
@@ -142,9 +143,7 @@ where
 
             self.draw_shape();
         }
-
-        let mut shapes = self.canvas.as_raw().to_vec();
-    }
+        }
 }
 
 impl<E, F> Sketcher<F> for PreslavSketcher<E>

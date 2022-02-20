@@ -51,8 +51,8 @@ impl WaveSketcher {
         ) / 2.0;
 
         let scale_mat = Mat2::from_cols(
-            Vec2::X * (2.0 / self.input_image.width() as f32),
-            Vec2::Y * (-2.0 / self.input_image.width() as f32),
+            Vec2::X * (2.0 / major_dimension as f32),
+            Vec2::Y * (-2.0 / major_dimension as f32),
         );
 
         // Create a line for each row of pixels, skipping the necessary number.
